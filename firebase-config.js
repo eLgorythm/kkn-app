@@ -4,7 +4,8 @@
 // ==========================================
 
 // firebase-config.js
-import { initializeApp } from "https://gstatic.com";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 // Import layanan Firebase lain yang Anda butuhkan (contoh: Auth atau Firestore)
 import { getAuth } from "https://gstatic.com";
 
