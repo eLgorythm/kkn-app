@@ -460,20 +460,10 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { auth } from './firebase-config.js';
 
-        // ==========================================
-        // CONFIGURATION FIREBASE
-        // Silakan sesuaikan dengan kredensial Firebase Anda
-        // ==========================================
-        const firebaseConfig = {
-          apiKey: "AIzaSyB96Oztmn8x5k7zeytEM8Ria3KzaDGRhwM",
-          authDomain: "kknunsiq-613c1.firebaseapp.com",
-          projectId: "kknunsiq-613c1",
-          storageBucket: "kknunsiq-613c1.firebasestorage.app",
-          messagingSenderId: "58429514757",
-          appId: "1:58429514757:web:5f9046a87e77f15708e86c",
-          measurementId: "G-RVPK4RHNLH"
-        };
+        // Anda sudah bisa menggunakan Firebase di sini
+        console.log("Firebase berhasil dimuat", auth);
 
         // Data Default 27 Kegiatan KKN (Minggu 1 s/d Minggu 3)
         const defaultDataset = [
