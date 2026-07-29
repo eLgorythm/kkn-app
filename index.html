@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rundown Kegiatan KKN - 0xfndLabs</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background-color: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            .shadow-card {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            th, td {
+                border: 1px solid #94a3b8 !important;
+                padding: 8px 10px !important;
+            }
+            th {
+                background-color: #f1f5f9 !important;
+                color: #0f172a !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12 antialiased">
+
+    <!-- Header Section -->
+    <header class="bg-indigo-900 text-white shadow-lg no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <div class="flex items-center space-x-3">
+                        <span class="bg-indigo-700 text-indigo-200 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-fire text-amber-400"></i> 0xfndLabs Connected
+                        </span>
+                        <span class="text-indigo-300 text-xs">
+                            <i class="fa-regular fa-calendar-check mr-1"></i> Penerjunan: 4 Agustus 2026
+                        </span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-bold mt-1 tracking-tight">Rundown Kegiatan KKN Desa Sokaraja</h1>
+                    <p class="text-indigo-200 text-sm mt-0.5">Jadwal Pelaksanaan Program Kerja Minggu 1 s/d Minggu 6</p>
+                </div>
+                <!-- Top Action Buttons -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="seedInitialData()" title="Upload 27 data default ke Firestore" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-3.5 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Sync Data Awal (27 Entry)</span>
+                    </button>
+                    <button onclick="openProgressModal()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-4 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Lihat Progress</span>
+                    </button>
+                    <button onclick="openAddModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Kegiatan</span>
+                    </button>
+                    <button onclick="exportToCSV()" class="bg-indigo-700 hover:bg-indigo-600 text-white font-medium px-3.5 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white font-medium px-3.5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2 border border-indigo-400/30">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Header Print Only -->
+    <div class="hidden print-only p-6 border-b border-slate-300 mb-6">
+        <h1 class="text-2xl font-bold text-slate-900">DOKUMEN RUNDOWN KEGIATAN KKN DESA SOKARAJA</h1>
+        <p class="text-sm text-slate-600 mt-1">Hari Penerjunan: Selasa, 4 Agustus 2026 | Periode Minggu 1 - Minggu 6</p>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6 no-print">
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total</p>
+                    <p id="stat-total" class="text-xl font-bold text-slate-900 mt-0.5">0</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-list-check text-sm"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Minggu 1</p>
+                    <p id="stat-m1" class="text-xl font-bold text-amber-600 mt-0.5">0</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-1 text-sm"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Minggu 2</p>
+                    <p id="stat-m2" class="text-xl font-bold text-rose-600 mt-0.5">0</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-2 text-sm"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Minggu 3</p>
+                    <p id="stat-m3" class="text-xl font-bold text-sky-600 mt-0.5">0</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-3 text-sm"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Minggu 4</p>
+                    <p id="stat-m4" class="text-xl font-bold text-purple-600 mt-0.5">0</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-4 text-sm"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Minggu 5</p>
+                    <p id="stat-m5" class="text-xl font-bold text-teal-600 mt-0.5">0</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-5 text-sm"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Minggu 6</p>
+                    <p id="stat-m6" class="text-xl font-bold text-emerald-600 mt-0.5">0</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-6 text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6 no-print">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                
+                <!-- Week Tabs -->
+                <div class="flex flex-wrap gap-1.5 bg-slate-100 p-1 rounded-lg">
+                    <button onclick="setWeekFilter('all')" id="tab-all" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-indigo-900 shadow-sm">
+                        Semua Minggu
+                    </button>
+                    <button onclick="setWeekFilter(1)" id="tab-1" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                        Minggu 1 (Sampah)
+                    </button>
+                    <button onclick="setWeekFilter(2)" id="tab-2" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                        Minggu 2 (Agustusan+TPQ)
+                    </button>
+                    <button onclick="setWeekFilter(3)" id="tab-3" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                        Minggu 3 (Stunting)
+                    </button>
+                    <button onclick="setWeekFilter(4)" id="tab-4" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                        Minggu 4
+                    </button>
+                    <button onclick="setWeekFilter(5)" id="tab-5" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                        Minggu 5
+                    </button>
+                    <button onclick="setWeekFilter(6)" id="tab-6" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                        Minggu 6
+                    </button>
+                </div>
+
+                <!-- Search & Proker Dropdown Filter -->
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="search-input" oninput="renderTable()" placeholder="Cari kegiatan/proker..." class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+                    <!-- Filter Status -->
+                    <select id="status-filter" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">Semua Status</option>
+                        <option value="Belum">⌛ Belum</option>
+                        <option value="Sedang">🔄 Sedang</option>
+                        <option value="Selesai">✅ Selesai</option>
+                    </select>
+
+                    <!-- Filter Prioritas -->
+                    <select id="priority-filter" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">Semua Prioritas</option>
+                        <option value="Tinggi">🔴 Tinggi</option>
+                        <option value="Sedang">🟠 Sedang</option>
+                        <option value="Rendah">🟢 Rendah</option>
+                    </select>
+
+                    <select id="proker-filter" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">Semua Proker</option>
+                        <option value="Penerjunan & Sowan">Penerjunan & Sowan</option>
+                        <option value="Observasi Desa">Observasi Desa</option>
+                        <option value="Proker Sampah">Proker Sampah</option>
+                        <option value="Proker TPQ">Proker TPQ</option>
+                        <option value="Proker Agustusan">Proker Agustusan</option>
+                        <option value="HUT Kemerdekaan">HUT Kemerdekaan</option>
+                        <option value="Proker Stunting">Proker Stunting</option>
+                        <option value="Proker UMKM">Proker UMKM</option>
+                        <option value="Proker Digitalisasi">Proker Digitalisasi</option>
+                        <option value="Proker Sekolah">Proker Sekolah</option>
+                        <option value="Proker Lingkungan">Proker Lingkungan</option>
+                        <option value="Penyusunan Laporan">Penyusunan Laporan</option>
+                        <option value="Penutupan & Penarikan">Penutupan & Penarikan</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Schedule Table Card -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden shadow-card">
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                            <th class="py-3.5 px-4 w-40">Hari / Tanggal</th>
+                            <th class="py-3.5 px-4 w-32">Waktu</th>
+                            <th class="py-3.5 px-4 w-28">Prioritas</th>
+                            <th class="py-3.5 px-4 w-44">Proker</th>
+                            <th class="py-3.5 px-4">Kegiatan</th>
+                            <th class="py-3.5 px-4 w-28">Status</th>
+                            <th class="py-3.5 px-4 w-24 text-center no-print">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-100">
+                        <!-- Dynamic content via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden py-12 text-center">
+                <i class="fa-regular fa-folder-open text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-500 font-medium">Belum ada kegiatan atau tidak ada hasil sesuai filter.</p>
+                <div class="mt-3 flex justify-center gap-3">
+                    <button onclick="openAddModal()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow">
+                        <i class="fa-solid fa-plus mr-1.5"></i> Tambah Kegiatan
+                    </button>
+                    <button onclick="resetFilters()" class="px-3 py-2 text-indigo-600 text-xs font-semibold hover:underline">
+                        Reset Filter
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal Form (Add / Edit) -->
+    <div id="item-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-150">
+            <div class="bg-indigo-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 id="modal-title" class="font-bold text-lg">Tambah Kegiatan Baru</h3>
+                <button onclick="closeModal()" class="text-indigo-200 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="modal-form" onsubmit="saveItem(event)" class="p-6 space-y-4">
+                <input type="hidden" id="item-id">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Minggu Ke</label>
+                    <select id="input-week" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="1">Minggu 1 (Sampah & Observasi)</option>
+                        <option value="2">Minggu 2 (Agustusan & TPQ)</option>
+                        <option value="3">Minggu 3 (Stunting)</option>
+                        <option value="4">Minggu 4</option>
+                        <option value="5">Minggu 5</option>
+                        <option value="6">Minggu 6</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Hari / Tanggal</label>
+                        <input type="text" id="input-date" required placeholder="Contoh: Selasa, 25 Aug 2026" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Waktu</label>
+                        <input type="text" id="input-time" required placeholder="Contoh: 09.00 – 12.00" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Proker / Bidang</label>
+                    <input type="text" id="input-proker" required list="proker-suggestions" placeholder="Contoh: Proker UMKM" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <datalist id="proker-suggestions">
+                        <option value="Penerjunan & Sowan"></option>
+                        <option value="Observasi Desa"></option>
+                        <option value="Proker Sampah"></option>
+                        <option value="Proker TPQ"></option>
+                        <option value="Proker Agustusan"></option>
+                        <option value="HUT Kemerdekaan"></option>
+                        <option value="Proker Stunting"></option>
+                        <option value="Proker UMKM"></option>
+                        <option value="Proker Digitalisasi"></option>
+                        <option value="Proker Sekolah"></option>
+                        <option value="Proker Lingkungan"></option>
+                        <option value="Penyusunan Laporan"></option>
+                        <option value="Penutupan & Penarikan"></option>
+                    </datalist>
+                </div>
+
+                <!-- Input Prioritas & Status -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Prioritas</label>
+                        <select id="input-priority" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Tinggi">🔴 Tinggi</option>
+                            <option value="Sedang" selected>🟠 Sedang</option>
+                            <option value="Rendah">🟢 Rendah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Status</label>
+                        <select id="input-status" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Belum" selected>⌛ Belum</option>
+                            <option value="Sedang">🔄 Sedang</option>
+                            <option value="Selesai">✅ Selesai</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Detail Kegiatan</label>
+                    <textarea id="input-activity" required rows="3" placeholder="Deskripsi rincian kegiatan..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow">
+                        Simpan ke Cloud
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Progress Modal (Dialog Card) -->
+    <div id="progress-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
+            <!-- Modal Header -->
+            <div class="bg-indigo-900 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-pie text-xl text-indigo-300"></i>
+                    <h3 class="font-bold text-lg">Analisis & Progress Kegiatan KKN</h3>
+                </div>
+                <button onclick="closeProgressModal()" class="text-indigo-200 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6 max-h-[80vh] overflow-y-auto space-y-6">
+                <!-- Overall Progress Card -->
+                <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
+                    <h4 class="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-globe"></i> Overall Progress
+                    </h4>
+                    
+                    <div class="flex items-center justify-between text-xs font-semibold text-indigo-900 mb-1.5">
+                        <span id="overall-progress-text">0% Selesai</span>
+                        <span id="overall-ratio-text">0 / 0 Kegiatan</span>
+                    </div>
+                    
+                    <div class="w-full bg-indigo-100 rounded-full h-4 overflow-hidden mb-4">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+
+                    <!-- Statistics Cards Grid -->
+                    <div class="grid grid-cols-4 gap-2.5 text-center">
+                        <div class="bg-white p-2 rounded-lg border border-slate-100 shadow-sm">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase">Total</span>
+                            <span id="prog-total" class="text-base font-extrabold text-slate-800">0</span>
+                        </div>
+                        <div class="bg-emerald-50 p-2 rounded-lg border border-emerald-100 shadow-sm">
+                            <span class="block text-[10px] font-bold text-emerald-600 uppercase">Selesai</span>
+                            <span id="prog-selesai" class="text-base font-extrabold text-emerald-700">0</span>
+                        </div>
+                        <div class="bg-blue-50 p-2 rounded-lg border border-blue-100 shadow-sm">
+                            <span class="block text-[10px] font-bold text-blue-600 uppercase">Sedang</span>
+                            <span id="prog-sedang" class="text-base font-extrabold text-blue-700">0</span>
+                        </div>
+                        <div class="bg-slate-100 p-2 rounded-lg border border-slate-200 shadow-sm">
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase">Belum</span>
+                            <span id="prog-belum" class="text-base font-extrabold text-slate-600">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Progress Section -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-week"></i> Progress Mingguan (Minggu 1 - 6)
+                    </h4>
+                    
+                    <div id="weekly-progress-list" class="space-y-4">
+                        <!-- Weekly progress items rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-6 py-4 flex justify-end border-t border-slate-100">
+                <button onclick="closeProgressModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold shadow transition-all">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl text-sm font-medium transition-all transform translate-y-20 opacity-0 z-50 flex items-center space-x-2 no-print">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message">Pesan notifikasi</span>
+    </div>
+
+    <!-- Firebase Module Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // CONFIGURATION FIREBASE
+        // Silakan sesuaikan dengan kredensial Firebase Anda
+        // ==========================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyB96Oztmn8x5k7zeytEM8Ria3KzaDGRhwM",
+          authDomain: "kknunsiq-613c1.firebaseapp.com",
+          projectId: "kknunsiq-613c1",
+          storageBucket: "kknunsiq-613c1.firebasestorage.app",
+          messagingSenderId: "58429514757",
+          appId: "1:58429514757:web:5f9046a87e77f15708e86c",
+          measurementId: "G-RVPK4RHNLH"
+        };
+
+        // Data Default 27 Kegiatan KKN (Minggu 1 s/d Minggu 3)
+        const defaultDataset = [
+            // MINGGU 1 (4 Aug - 10 Aug 2026)
+            { id: "kkn_101", week: 1, date: "Selasa, 4 Aug 2026", time: "08.00 – 11.00", proker: "Penerjunan & Sowan", activity: "Penerjunan resmi mahasiswa KKN ke lokasi desa, penerimaan oleh perangkat desa, serta penataan posko.", priority: "Tinggi", status: "Selesai" },
+            { id: "kkn_102", week: 1, date: "Selasa, 4 Aug 2026", time: "13.00 – 16.00", proker: "Observasi Desa", activity: "Silaturahmi dan sowan ke kediaman Ketua RT/RW, tokoh masyarakat, serta sesepuh desa setempat.", priority: "Tinggi", status: "Selesai" },
+            { id: "kkn_103", week: 1, date: "Rabu, 5 Aug 2026", time: "09.00 – 12.00", proker: "Proker Sampah", activity: "Observasi lapangan ke titik-titik pembuangan sampah warga dan pemetaan permasalahan sampah desa.", priority: "Sedang", status: "Selesai" },
+            { id: "kkn_104", week: 1, date: "Rabu, 5 Aug 2026", time: "15.30 – 17.00", proker: "Proker Sampah", activity: "Diskusi dan koordinasi awal dengan pengurus Bank Sampah / Karang Taruna terkait tata kelola sampah.", priority: "Sedang", status: "Selesai" },
+            { id: "kkn_105", week: 1, date: "Kamis, 6 Aug 2026", time: "09.00 – 11.30", proker: "Proker Sampah", activity: "Pembuatan media edukasi (poster, pamflet) dan penyiapan fasilitas tempat sampah pemilahan.", priority: "Rendah", status: "Selesai" },
+            { id: "kkn_106", week: 1, date: "Jumat, 7 Aug 2026", time: "08.00 – 11.00", proker: "Proker Sampah", activity: "Aksi Kerja Bakti Lingkungan bersama warga untuk pembersihan area publik dan tempat pembuangan liar.", priority: "Tinggi", status: "Selesai" },
+            { id: "kkn_107", week: 1, date: "Jumat, 7 Aug 2026", time: "13.30 – 15.30", proker: "Proker Sampah", activity: "Pengadaan dan penempatan tong sampah pemilahan (organik/anorganik) di titik-titik vital.", priority: "Sedang", status: "Selesai" },
+            { id: "kkn_108", week: 1, date: "Sabtu, 8 Aug 2026", time: "09.00 – 11.30", proker: "Proker Sampah", activity: "Sosialisasi \"Pengelolaan & Pemilahan Sampah Rumah Tangga\" bersama kelompok warga / ibu-ibu PKK.", priority: "Tinggi", status: "Selesai" },
+            { id: "kkn_109", week: 1, date: "Minggu, 9 Aug 2026", time: "08.00 – 11.00", proker: "Proker Sampah", activity: "Pelatihan pemanfaatan sampah anorganik.", priority: "Sedang", status: "Selesai" },
+            { id: "kkn_110", week: 1, date: "Senin, 10 Aug 2026", time: "09.00 – 12.00", proker: "Proker Sampah", activity: "Penyelesaian dan rekap data hasil pemilahan serta pengolahan sampah.", priority: "Rendah", status: "Selesai" },
+
+            // MINGGU 2 (11 Aug - 17 Aug 2026)
+            { id: "kkn_201", week: 2, date: "Selasa, 11 Aug 2026", time: "15.30 – 17.00", proker: "Proker TPQ", activity: "Pendampingan dan kegiatan mengajar mengaji rutin di TPQ desa (Materi Tajwid & Makhraj).", priority: "Sedang", status: "Sedang" },
+            { id: "kkn_202", week: 2, date: "Selasa, 11 Aug 2026", time: "19.30 – 21.00", proker: "Proker Agustusan", activity: "Rapat pemantapan teknis perlombaan HUT RI bersama pengurus Karang Taruna dan panitia desa.", priority: "Tinggi", status: "Sedang" },
+            { id: "kkn_203", week: 2, date: "Rabu, 12 Aug 2026", time: "15.30 – 17.00", proker: "Proker TPQ", activity: "Mengajar mengaji serta bimbingan hafalan surah-surah pendek dan doa harian anak-anak TPQ.", priority: "Sedang", status: "Belum" },
+            { id: "kkn_204", week: 2, date: "Rabu, 12 Aug 2026", time: "19.00 – 21.00", proker: "Proker Agustusan", activity: "Persiapan arena, pendaftaran peserta, dan perlengkapan logistik perlombaan Agustusan.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_205", week: 2, date: "Kamis, 13 Aug 2026", time: "15.30 – 17.00", proker: "Proker TPQ", activity: "Pelatihan dan bimbingan praktik ibadah, dan pembinaan akhlak anak-anak TPQ.", priority: "Sedang", status: "Belum" },
+            { id: "kkn_206", week: 2, date: "Jumat, 14 Aug 2026", time: "14.00 – 17.00", proker: "Proker Agustusan", activity: "Pembukaan dan pelaksanaan Lomba Agustusan Kategori Anak-Anak.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_207", week: 2, date: "Sabtu, 15 Aug 2026", time: "14.00 – 17.30", proker: "Proker Agustusan", activity: "Pelaksanaan Perlombaan Agustusan Kategori Umum / Orang Tua.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_208", week: 2, date: "Minggu, 16 Aug 2026", time: "19.30 – Selesai", proker: "Proker Agustusan", activity: "Malam Tirakatan, Pentas Seni Puncak Kemerdekaan RI, serta Pembagian Hadiah Lomba.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_209", week: 2, date: "Senin, 17 Aug 2026", time: "07.00 – 09.00", proker: "HUT Kemerdekaan", activity: "Kehadiran dan partisipasi penuh pada Upacara Bendera Peringatan HUT RI Ke-81 tingkat Desa/Kecamatan.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_210", week: 2, date: "Senin, 17 Aug 2026", time: "10.00 – 13.00", proker: "Proker Agustusan", activity: "Kerja bakti pembersihan dan pembenahan area bekas panggung / tempat perlombaan Agustusan.", priority: "Rendah", status: "Belum" },
+
+            // MINGGU 3 (18 Aug - 24 Aug 2026)
+            { id: "kkn_301", week: 3, date: "Selasa, 18 Aug 2026", time: "09.00 – 12.00", proker: "Proker Stunting", activity: "Koordinasi teknis dengan Bidan Desa, Kader Posyandu, dan Pihak Puskesmas setempat.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_302", week: 3, date: "Rabu, 19 Aug 2026", time: "09.00 – 11.30", proker: "Proker Stunting", activity: "Validasi data balita, ibu hamil, serta pemetaan zonasi risiko stunting di tingkat RT/RW.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_303", week: 3, date: "Kamis, 20 Aug 2026", time: "09.00 – 12.00", proker: "Proker Stunting", activity: "Penyusunan modul sosialisasi gizi buruk dan penyiapan bahan Pemberian Makanan Tambahan (PMT).", priority: "Sedang", status: "Belum" },
+            { id: "kkn_304", week: 3, date: "Jumat, 21 Aug 2026", time: "08.00 – 11.00", proker: "Proker Stunting", activity: "Pendampingan Kegiatan Posyandu: Penimbangan berat, pengukuran panjang badan, dan rekap gizi balita.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_305", week: 3, date: "Sabtu, 22 Aug 2026", time: "09.00 – 11.30", proker: "Proker Stunting", activity: "Seminar & Sosialisasi \"Pencegahan Stunting Melalui Pola Asuh Gizi Seimbang\" bagi Ibu Hamil & Balita.", priority: "Tinggi", status: "Belum" },
+            { id: "kkn_306", week: 3, date: "Minggu, 23 Aug 2026", time: "08.30 – 11.00", proker: "Proker Stunting", activity: "Edukasi Pemanfaatan Bahan Pangan Lokal untuk Menu Sehat Keluarga.", priority: "Sedang", status: "Belum" },
+            { id: "kkn_307", week: 3, date: "Senin, 24 Aug 2026", time: "09.00 – 12.00", proker: "Proker Stunting", activity: "Penyusunan rekapitulasi data posyandu dan pengarsipan materi edukasi stunting.", priority: "Rendah", status: "Belum" }
+        ];
+
+        let db = null;
+        let rundownCollection = null;
+        let scheduleData = [];
+        window.currentWeekFilter = 'all';
+        window.scheduleData = scheduleData;
+
+        // Check if firebase is configured
+        const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+
+        if (isFirebaseConfigured) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                rundownCollection = collection(db, "rundown_kkn");
+
+                // Listen to Realtime updates from Firestore
+                onSnapshot(rundownCollection, (snapshot) => {
+                    scheduleData = [];
+                    snapshot.forEach((docSnap) => {
+                        scheduleData.push({
+                            id: docSnap.id,
+                            ...docSnap.data()
+                        });
+                    });
+                    
+                    // Sort items by ID for standard sequence
+                    scheduleData.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+                    window.scheduleData = scheduleData;
+                    if (typeof window.renderTable === 'function') {
+                        window.renderTable();
+                    }
+                }, (error) => {
+                    console.error("Firestore Listen Error:", error);
+                    showToast("Gagal terhubung ke Firestore. Cek Rules!", "danger");
+                });
+            } catch (e) {
+                console.error("Firebase init error:", e);
+                scheduleData = [...defaultDataset];
+                window.scheduleData = scheduleData;
+                if (typeof window.renderTable === 'function') {
+                    window.renderTable();
+                }
+            }
+        } else {
+            // Local fallback dataset if Firebase key is placeholder
+            scheduleData = [...defaultDataset];
+            window.scheduleData = scheduleData;
+            if (typeof window.renderTable === 'function') {
+                window.renderTable();
+            }
+        }
+
+        // ==========================================
+        // Seed Initial Data into Firestore
+        // ==========================================
+        window.seedInitialData = async function() {
+            if (!isFirebaseConfigured || !db) {
+                showToast("Data lokal sudah di-load! Masukkan API Key Firebase untuk sync ke Cloud", "danger");
+                scheduleData = [...defaultDataset];
+                window.scheduleData = scheduleData;
+                if (typeof window.renderTable === 'function') window.renderTable();
+                return;
+            }
+
+            try {
+                showToast("Sedang mengunggah 27 kegiatan ke Firestore...", "info");
+                const batch = writeBatch(db);
+
+                defaultDataset.forEach((item) => {
+                    const docRef = doc(db, "rundown_kkn", String(item.id));
+                    batch.set(docRef, {
+                        week: item.week,
+                        date: item.date,
+                        time: item.time,
+                        proker: item.proker,
+                        activity: item.activity,
+                        priority: item.priority || "Sedang",
+                        status: item.status || "Belum",
+                        updatedAt: new Date().toISOString()
+                    });
+                });
+
+                await batch.commit();
+                showToast("Berhasil Sync 27 Kegiatan KKN (M1 - M3) ke Firestore!");
+            } catch (err) {
+                console.error("Seed error:", err);
+                showToast("Gagal Upload: " + err.message, "danger");
+            }
+        };
+
+        // Save / Update Document Function
+        window.saveItem = async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('item-id').value;
+            const week = parseInt(document.getElementById('input-week').value);
+            const date = document.getElementById('input-date').value.trim();
+            const time = document.getElementById('input-time').value.trim();
+            const proker = document.getElementById('input-proker').value.trim();
+            const priority = document.getElementById('input-priority').value;
+            const status = document.getElementById('input-status').value;
+            const activity = document.getElementById('input-activity').value.trim();
+
+            const docId = id ? String(id) : 'kkn_' + Date.now();
+            const dataObj = { week, date, time, proker, priority, status, activity, updatedAt: new Date().toISOString() };
+
+            if (isFirebaseConfigured && db) {
+                try {
+                    await setDoc(doc(db, "rundown_kkn", docId), dataObj);
+                    showToast(id ? 'Kegiatan berhasil diperbarui' : 'Kegiatan baru tersimpan ke Firestore');
+                } catch (e) {
+                    showToast('Gagal menyimpan: ' + e.message, 'danger');
+                }
+            } else {
+                if (id) {
+                    const idx = scheduleData.findIndex(i => String(i.id) === String(id));
+                    if (idx !== -1) scheduleData[idx] = { id: docId, ...dataObj };
+                } else {
+                    scheduleData.push({ id: docId, ...dataObj });
+                }
+                showToast('Tersimpan di memori lokal');
+                if (typeof window.renderTable === 'function') window.renderTable();
+            }
+
+            closeModal();
+        };
+
+        // Delete Document Function
+        window.deleteItem = async function(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus kegiatan ini?")) {
+                if (isFirebaseConfigured && db) {
+                    try {
+                        await deleteDoc(doc(db, "rundown_kkn", String(id)));
+                        showToast('Kegiatan telah dihapus dari cloud', 'danger');
+                    } catch (e) {
+                        showToast('Gagal menghapus: ' + e.message, 'danger');
+                    }
+                } else {
+                    scheduleData = scheduleData.filter(i => String(i.id) !== String(id));
+                    window.scheduleData = scheduleData;
+                    if (typeof window.renderTable === 'function') window.renderTable();
+                    showToast('Kegiatan dihapus', 'danger');
+                }
+            }
+        };
+
+        window.onload = function() {
+            if (typeof window.renderTable === 'function') {
+                window.renderTable();
+            }
+        };
+    </script>
+
+    <script>
+        // Global variables initialization
+        window.currentWeekFilter = window.currentWeekFilter || 'all';
+
+        // Badge styling helper for Priority
+        function getPriorityBadge(priority) {
+            if (priority === "Tinggi") {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">🔴 Tinggi</span>`;
+            } else if (priority === "Rendah") {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">🟢 Rendah</span>`;
+            }
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">🟠 Sedang</span>`;
+        }
+
+        // Badge styling helper for Status
+        function getStatusBadge(status) {
+            if (status === "Selesai") {
+                return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-circle-check"></i> Selesai</span>`;
+            } else if (status === "Sedang") {
+                return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800"><i class="fa-solid fa-spinner fa-spin text-[10px]"></i> Sedang</span>`;
+            }
+            return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-600"><i class="fa-regular fa-clock"></i> Belum</span>`;
+        }
+
+        // Badge styling helper
+        function getProkerBadge(proker) {
+            let colorClasses = "bg-slate-100 text-slate-700 border-slate-200";
+            let iconClass = "fa-tag";
+
+            if (proker.includes("Sampah")) {
+                colorClasses = "bg-amber-50 text-amber-800 border-amber-200";
+                iconClass = "fa-recycle";
+            } else if (proker.includes("TPQ")) {
+                colorClasses = "bg-emerald-50 text-emerald-800 border-emerald-200";
+                iconClass = "fa-book-quran";
+            } else if (proker.includes("Agustusan") || proker.includes("HUT")) {
+                colorClasses = "bg-rose-50 text-rose-800 border-rose-200";
+                iconClass = "fa-flag";
+            } else if (proker.includes("Stunting")) {
+                colorClasses = "bg-sky-50 text-sky-800 border-sky-200";
+                iconClass = "fa-hand-holding-medical";
+            } else if (proker.includes("Penerjunan") || proker.includes("Observasi")) {
+                colorClasses = "bg-indigo-50 text-indigo-800 border-indigo-200";
+                iconClass = "fa-compass";
+            } else if (proker.includes("UMKM") || proker.includes("Digitalisasi")) {
+                colorClasses = "bg-purple-50 text-purple-800 border-purple-200";
+                iconClass = "fa-store";
+            } else if (proker.includes("Sekolah")) {
+                colorClasses = "bg-amber-50 text-amber-900 border-amber-300";
+                iconClass = "fa-graduation-cap";
+            } else if (proker.includes("Lingkungan")) {
+                colorClasses = "bg-teal-50 text-teal-800 border-teal-200";
+                iconClass = "fa-tree";
+            } else if (proker.includes("Laporan")) {
+                colorClasses = "bg-blue-50 text-blue-800 border-blue-200";
+                iconClass = "fa-file-lines";
+            } else if (proker.includes("Penutupan") || proker.includes("Penarikan")) {
+                colorClasses = "bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200";
+                iconClass = "fa-handshake";
+            }
+
+            return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${colorClasses}">
+                <i class="fa-solid ${iconClass} text-[10px]"></i>
+                ${proker}
+            </span>`;
+        }
+
+        // Render Table Data globally
+        window.renderTable = function() {
+            const dataList = window.scheduleData || [];
+            const tableBody = document.getElementById('table-body');
+            const emptyState = document.getElementById('empty-state');
+            const searchKeyword = (document.getElementById('search-input') ? document.getElementById('search-input').value : '').toLowerCase();
+            const selectedProker = document.getElementById('proker-filter') ? document.getElementById('proker-filter').value : 'all';
+            const statusFilter = document.getElementById('status-filter') ? document.getElementById('status-filter').value : 'all';
+            const priorityFilter = document.getElementById('priority-filter') ? document.getElementById('priority-filter').value : 'all';
+            const weekFilter = window.currentWeekFilter || 'all';
+
+            // Filter data
+            const filteredData = dataList.filter(item => {
+                const matchesWeek = (weekFilter === 'all') || (item.week === parseInt(weekFilter));
+                const matchesProker = (selectedProker === 'all') || (item.proker === selectedProker);
+                const matchesStatus = (statusFilter === 'all') || ((item.status || 'Belum') === statusFilter);
+                const matchesPriority = (priorityFilter === 'all') || ((item.priority || 'Sedang') === priorityFilter);
+                const matchesSearch = (item.date || '').toLowerCase().includes(searchKeyword) ||
+                                      (item.time || '').toLowerCase().includes(searchKeyword) ||
+                                      (item.proker || '').toLowerCase().includes(searchKeyword) ||
+                                      (item.activity || '').toLowerCase().includes(searchKeyword);
+                return matchesWeek && matchesProker && matchesStatus && matchesPriority && matchesSearch;
+            });
+
+            // Update Statistics
+            updateStats(dataList);
+
+            // Handle Empty State
+            if (filteredData.length === 0) {
+                if (tableBody) tableBody.innerHTML = '';
+                if (emptyState) emptyState.classList.remove('hidden');
+                return;
+            } else {
+                if (emptyState) emptyState.classList.add('hidden');
+            }
+
+            // Render rows
+            let html = '';
+            filteredData.forEach(item => {
+                html += `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                        <div class="flex items-center space-x-2">
+                            <span>${item.date}</span>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-4 font-medium text-slate-600 whitespace-nowrap">
+                        <i class="fa-regular fa-clock mr-1 text-slate-400 text-xs"></i>${item.time}
+                    </td>
+                    <td class="py-3.5 px-4 whitespace-nowrap">
+                        ${getPriorityBadge(item.priority || 'Sedang')}
+                    </td>
+                    <td class="py-3.5 px-4 whitespace-nowrap">
+                        ${getProkerBadge(item.proker)}
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-700 leading-relaxed">
+                        ${item.activity}
+                    </td>
+                    <td class="py-3.5 px-4 whitespace-nowrap">
+                        ${getStatusBadge(item.status || 'Belum')}
+                    </td>
+                    <td class="py-3.5 px-4 text-center whitespace-nowrap no-print">
+                        <button onclick="editItem('${item.id}')" title="Edit" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteItem('${item.id}')" title="Hapus" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition-colors ml-1">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+                `;
+            });
+
+            if (tableBody) tableBody.innerHTML = html;
+        };
+
+        // Alias for function call
+        function renderTable() {
+            window.renderTable();
+        }
+
+        // Update Stat Badges
+        function updateStats(dataList) {
+            if (document.getElementById('stat-total')) document.getElementById('stat-total').innerText = dataList.length;
+            for (let w = 1; w <= 6; w++) {
+                const el = document.getElementById(`stat-m${w}`);
+                if (el) el.innerText = dataList.filter(i => i.week === w).length;
+            }
+            updateProgressStats();
+        }
+
+        // Week Tab Filter Handler
+        function setWeekFilter(week) {
+            window.currentWeekFilter = week;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900";
+            });
+
+            const activeBtn = document.getElementById(`tab-${week}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-indigo-900 shadow-sm";
+            }
+            renderTable();
+        }
+
+        function resetFilters() {
+            if (document.getElementById('search-input')) document.getElementById('search-input').value = '';
+            if (document.getElementById('proker-filter')) document.getElementById('proker-filter').value = 'all';
+            if (document.getElementById('status-filter')) document.getElementById('status-filter').value = 'all';
+            if (document.getElementById('priority-filter')) document.getElementById('priority-filter').value = 'all';
+            setWeekFilter('all');
+        }
+
+        // Modal Handlers
+        function openAddModal() {
+            document.getElementById('modal-title').innerText = 'Tambah Kegiatan Baru';
+            document.getElementById('item-id').value = '';
+            document.getElementById('modal-form').reset();
+            document.getElementById('item-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('item-modal').classList.add('hidden');
+        }
+
+        // Progress Modal Handlers and Calculations
+        function updateProgressStats() {
+            const dataList = window.scheduleData || [];
+            
+            // Overall Stats
+            const total = dataList.length;
+            const selesai = dataList.filter(item => item.status === 'Selesai').length;
+            const sedang = dataList.filter(item => item.status === 'Sedang').length;
+            const belum = dataList.filter(item => (item.status || 'Belum') === 'Belum').length;
+            
+            const overallPercentage = total > 0 ? Math.round((selesai / total) * 100) : 0;
+            
+            // Update Overall Stats DOM
+            const overallProgressText = document.getElementById('overall-progress-text');
+            const overallRatioText = document.getElementById('overall-ratio-text');
+            const overallProgressBar = document.getElementById('overall-progress-bar');
+            
+            if (overallProgressText) overallProgressText.innerText = `${overallPercentage}% Selesai`;
+            if (overallRatioText) overallRatioText.innerText = `${selesai} / ${total} Kegiatan`;
+            if (overallProgressBar) overallProgressBar.style.width = `${overallPercentage}%`;
+            
+            if (document.getElementById('prog-total')) document.getElementById('prog-total').innerText = total;
+            if (document.getElementById('prog-selesai')) document.getElementById('prog-selesai').innerText = selesai;
+            if (document.getElementById('prog-sedang')) document.getElementById('prog-sedang').innerText = sedang;
+            if (document.getElementById('prog-belum')) document.getElementById('prog-belum').innerText = belum;
+            
+            // Weekly Stats
+            const weekLabels = {
+                1: "Minggu 1 (Sampah & Observasi)",
+                2: "Minggu 2 (Agustusan & TPQ)",
+                3: "Minggu 3 (Stunting)",
+                4: "Minggu 4",
+                5: "Minggu 5",
+                6: "Minggu 6"
+            };
+            
+            const weekColors = {
+                1: { progress: 'bg-amber-500', barBg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200' },
+                2: { progress: 'bg-rose-500', barBg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-200' },
+                3: { progress: 'bg-sky-500', barBg: 'bg-sky-100', text: 'text-sky-700', border: 'border-sky-200' },
+                4: { progress: 'bg-purple-500', barBg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200' },
+                5: { progress: 'bg-teal-500', barBg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-200' },
+                6: { progress: 'bg-emerald-500', barBg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' }
+            };
+            
+            let weeklyHtml = '';
+            for (let w = 1; w <= 6; w++) {
+                const weekData = dataList.filter(item => item.week === w);
+                const wTotal = weekData.length;
+                const wSelesai = weekData.filter(item => item.status === 'Selesai').length;
+                const wSedang = weekData.filter(item => item.status === 'Sedang').length;
+                const wBelum = weekData.filter(item => (item.status || 'Belum') === 'Belum').length;
+                
+                const wPercentage = wTotal > 0 ? Math.round((wSelesai / wTotal) * 100) : 0;
+                const colors = weekColors[w] || weekColors[1];
+                const label = weekLabels[w] || `Minggu ${w}`;
+                
+                weeklyHtml += `
+                    <div class="p-3.5 rounded-lg border ${colors.border} bg-white shadow-sm">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold ${colors.text}">${label}</span>
+                            <span class="text-xs font-semibold ${colors.text}">${wPercentage}% (${wSelesai}/${wTotal})</span>
+                        </div>
+                        <div class="w-full ${colors.barBg} rounded-full h-2.5 overflow-hidden mb-2">
+                            <div class="h-full ${colors.progress} rounded-full transition-all duration-500" style="width: ${wPercentage}%"></div>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Selesai: ${wSelesai}</span>
+                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Sedang: ${wSedang}</span>
+                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Belum: ${wBelum}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const weeklyProgressList = document.getElementById('weekly-progress-list');
+            if (weeklyProgressList) weeklyProgressList.innerHTML = weeklyHtml;
+        }
+
+        function openProgressModal() {
+            updateProgressStats();
+            document.getElementById('progress-modal').classList.remove('hidden');
+        }
+
+        function closeProgressModal() {
+            document.getElementById('progress-modal').classList.add('hidden');
+        }
+
+        function editItem(id) {
+            const dataList = window.scheduleData || [];
+            const item = dataList.find(i => String(i.id) === String(id));
+            if (!item) return;
+
+            document.getElementById('modal-title').innerText = 'Edit Kegiatan KKN';
+            document.getElementById('item-id').value = item.id;
+            document.getElementById('input-week').value = item.week;
+            document.getElementById('input-date').value = item.date;
+            document.getElementById('input-time').value = item.time;
+            document.getElementById('input-proker').value = item.proker;
+            document.getElementById('input-priority').value = item.priority || 'Sedang';
+            document.getElementById('input-status').value = item.status || 'Belum';
+            document.getElementById('input-activity').value = item.activity;
+
+            document.getElementById('item-modal').classList.remove('hidden');
+        }
+
+        // Export to CSV Function
+        function exportToCSV() {
+            const dataList = window.scheduleData || [];
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Hari/Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
+
+            dataList.forEach(item => {
+                const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
+                const cleanTime = `"${item.time.replace(/"/g, '""')}"`;
+                const cleanPriority = `"${(item.priority || 'Sedang').replace(/"/g, '""')}"`;
+                const cleanProker = `"${item.proker.replace(/"/g, '""')}"`;
+                const cleanActivity = `"${item.activity.replace(/"/g, '""')}"`;
+                const cleanStatus = `"${(item.status || 'Belum').replace(/"/g, '""')}"`;
+                csvContent += `${cleanDate},${cleanTime},${cleanPriority},${cleanProker},${cleanActivity},${cleanStatus}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Rundown_KKN.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('File CSV berhasil diunduh');
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === 'danger') {
+                toastIcon.className = 'fa-solid fa-circle-xmark text-rose-400';
+            } else if (type === 'info') {
+                toastIcon.className = 'fa-solid fa-circle-info text-sky-400';
+            } else {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
