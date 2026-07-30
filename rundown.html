@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- jsPDF + AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
@@ -84,9 +87,9 @@
                         <i class="fa-solid fa-file-excel"></i>
                         <span>Export CSV</span>
                     </button>
-                    <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-lg text-xs transition-all flex items-center space-x-1.5 border border-white/20">
-                        <i class="fa-solid fa-print"></i>
-                        <span>Cetak</span>
+                    <button onclick="exportPDFAll()" title="Export PDF Semua Minggu" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-1.5 border border-white/20">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Export PDF</span>
                     </button>
                     <a href="index.html" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
                         <i class="fa-solid fa-table-cells"></i>
@@ -370,7 +373,7 @@
 
     <!-- WhatsApp Export Modal -->
     <div id="modal-wa" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden no-print">
-        <!-- ... existing modal-wa code ... -->
+        <!-- WhatsApp Broadcast Modal -->
     </div>
 
         <!-- Supabase SQL Setup Modal -->
@@ -387,7 +390,7 @@
             </div>
             <div class="p-6 space-y-4">
                 <p class="text-xs text-slate-600">
-                    Jika data Supabase belum muncul, salin perintah SQL di bawah ini dan jalankan di menu <strong class="text-slate-800">SQL Editor</strong> di Dashboard Supabase Anda:
+                    Setup awal Supabase, salin perintah SQL di bawah ini dan jalankan di menu <strong class="text-slate-800">SQL Editor</strong> di Dashboard Supabase:
                 </p>
                 <div class="relative">
                     <pre id="sql-code" class="bg-slate-900 text-emerald-400 p-4 rounded-xl text-[11px] font-mono leading-relaxed overflow-x-auto custom-scrollbar">CREATE TABLE IF NOT EXISTS kkn_rundown (
@@ -820,94 +823,179 @@ WITH CHECK (true);</pre>
             document.getElementById('modal-add').classList.remove('hidden');
         }
 
-        // WhatsApp Export Modal Logic
+        // WhatsApp Broadcast (Modal placeholder)
         function openWAModal() {
-            const daySelect = document.getElementById('wa-day-select');
-            if (selectedDayFilter !== 'all') {
-                daySelect.value = selectedDayFilter;
-            } else {
-                daySelect.value = 'Senin';
-            }
-            generateWABroadcast();
             document.getElementById('modal-wa').classList.remove('hidden');
         }
 
-        function closeWAModalhub() {
+        function closeWAModal() {
             document.getElementById('modal-wa').classList.add('hidden');
         }
 
-        function generateWABroadcast() {
-            const day = document.getElementById('wa-day-select').value;
-            const items = scheduleData.filter(i => i.day === day && (i.week || 1) == currentWeek);
-
-            let msg = `*📢 JADWAL & AGENDA HARIAN KKN*\n`;
-            msg += `📌 *Hari:* ${day} (Pekan ${currentWeek})\n`;
-            msg += `------------------------------------\n\n`;
-
-            if (items.length === 0) {
-                msg += `_Belum ada agenda terdaftar untuk hari ini._\n\n`;
-            } else {
-                items.forEach((item, index) => {
-                    msg += `*${index + 1}. ${item.title}*\n`;
-                    msg += `⏰ Waktu: ${item.time}\n`;
-                    msg += `📍 Lokasi: ${item.location || '-'}\n`;
-                    msg += `👤 PJ: ${item.pj || '-'}\n`;
-                    msg += `📌 Catatan: ${item.notes || '-'}\n\n`;
-                });
-            }
-
-            msg += `------------------------------------\n`;
-            msg += `_Mohon seluruh anggota tim posko hadir tepat waktu. Terima kasih!_ 🙏✨`;
-
-            document.getElementById('wa-text-area').value = msg;
-        }
-
-        function copyToClipboardWA() {
-            const textArea = document.getElementById('wa-text-area');
-            textArea.select();
-            document.execCommand('copy');
-
-            const btnText = document.getElementById('copy-btn-text');
-            btnText.innerText = "Tersalin!";
-            showToast("Teks format WA tersalin ke clipboard!");
-            setTimeout(() => {
-                btnText.innerText = "Salin Teks";
-            }, 2000);
-        }
-
-        // Export to CSV
+        // Export to CSV (all weeks in single file, split per week)
         function exportCSV() {
             if (scheduleData.length === 0) {
                 showToast("Tidak ada data untuk diexport!");
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,";
+            let csvContent = "";
             csvContent += "Pekan,Hari,Waktu,Kategori,Nama Agenda,Lokasi,PJ,Status,Catatan\n";
 
-            scheduleData.forEach(i => {
-                const row = [
-                    i.week || 1,
-                    `"${i.day}"`,
-                    `"${i.time}"`,
-                    `"${i.category}"`,
-                    `"${i.title.replace(/"/g, '""')}"`,
-                    `"${(i.location || '').replace(/"/g, '""')}"`,
-                    `"${(i.pj || '').replace(/"/g, '""')}"`,
-                    `"${i.status}"`,
-                    `"${(i.notes || '').replace(/"/g, '""')}"`
-                ];
-                csvContent += row.join(",") + "\n";
+            const weeks = [1, 2, 3, 4, 5, 6];
+            let totalExported = 0;
+            let firstWeek = true;
+
+            weeks.forEach(w => {
+                const wData = scheduleData.filter(i => String(i.week) === String(w));
+                if (wData.length === 0) return;
+
+                if (!firstWeek) {
+                    csvContent += "\n";
+                }
+                firstWeek = false;
+
+                wData.forEach(i => {
+                    const row = [
+                        i.week || 1,
+                        `"${i.day}"`,
+                        `"${i.time}"`,
+                        `"${i.category}"`,
+                        `"${i.title.replace(/"/g, '""')}"`,
+                        `"${(i.location || '').replace(/"/g, '""')}"`,
+                        `"${(i.pj || '').replace(/"/g, '""')}"`,
+                        `"${i.status}"`,
+                        `"${(i.notes || '').replace(/"/g, '""')}"`
+                    ];
+                    csvContent += row.join(",") + "\n";
+                });
+
+                totalExported += wData.length;
             });
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Rundown_KKN_Minggu_${currentWeek}.csv`);
+            link.setAttribute("download", "Rundown_KKN_Semua_Minggu.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast("File CSV berhasil diunduh!");
+            showToast("File CSV semua minggu berhasil diunduh!");
+        }
+
+        // Export PDF All Weeks (single file, per-week sections)
+        function exportPDFAll() {
+            try {
+                if (typeof window.jspdf === 'undefined') {
+                    showToast('jsPDF library tidak tersedia. Periksa koneksi internet.', 'danger');
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                const pageW = doc.internal.pageSize.getWidth();
+                const weeks = [1, 2, 3, 4, 5, 6];
+
+                let totalCount = 0;
+                let firstPage = true;
+
+                weeks.forEach((w, idx) => {
+                    const wData = scheduleData.filter(i => String(i.week) === String(w));
+                    if (wData.length === 0) return;
+                    totalCount += wData.length;
+
+                    if (!firstPage) doc.addPage();
+                    firstPage = false;
+
+                    doc.setFontSize(16);
+                    doc.setTextColor(49, 46, 129);
+                    doc.text('RUNDOWN KEGIATAN KKN - MINGGU KE-' + w, pageW / 2, 20, { align: 'center' });
+
+                    doc.setDrawColor(99, 102, 241);
+                    doc.setLineWidth(1.5);
+                    doc.line(14, 24, pageW - 14, 24);
+
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text('Kegiatan: ' + wData.length + ' item', 14, 32);
+
+                    const rows = wData.map(item => [
+                        item.day,
+                        item.time,
+                        item.category,
+                        item.title + (item.notes ? ' — ' + item.notes : ''),
+                        item.location || '-',
+                        item.pj || '-',
+                        item.status
+                    ]);
+
+                    if (typeof doc.autoTable !== 'function') {
+                        throw new Error('AutoTable plugin tidak terload.');
+                    }
+
+                    doc.autoTable({
+                        startY: 37,
+                        head: [['Hari', 'Waktu', 'Kategori', 'Nama Agenda', 'Lokasi', 'PJ', 'Status']],
+                        body: rows,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [79, 70, 229],
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            fontSize: 9,
+                            halign: 'left'
+                        },
+                        bodyStyles: {
+                            fontSize: 8,
+                            textColor: [30, 41, 59]
+                        },
+                        alternateRowStyles: {
+                            fillColor: [248, 250, 252]
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 28 },
+                            1: { cellWidth: 26 },
+                            2: { cellWidth: 30 },
+                            3: { cellWidth: 'auto' },
+                            4: { cellWidth: 28 },
+                            5: { cellWidth: 28 },
+                            6: { cellWidth: 22 }
+                        },
+                        margin: { left: 14, right: 14 },
+                        tableLineColor: [203, 213, 225],
+                        tableLineWidth: 0.5
+                    });
+                });
+
+                if (totalCount === 0) {
+                    showToast('Tidak ada data untuk di-export.', 'info');
+                    return;
+                }
+
+                const lastY = doc.lastAutoTable ? doc.lastAutoTable.finalY || 50 : 50;
+                doc.setFontSize(7);
+                doc.setTextColor(148, 163, 184);
+                doc.text('Rundown Kegiatan KKN Desa Sokaraja - 0xfndLabs', pageW / 2, lastY + 20, { align: 'center' });
+
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(7);
+                    doc.setTextColor(148, 163, 184);
+                    doc.text(
+                        'Rundown KKN - 0xfndLabs | Halaman ' + i + ' dari ' + pageCount,
+                        pageW / 2,
+                        doc.internal.pageSize.getHeight() - 8,
+                        { align: 'center' }
+                    );
+                }
+
+                doc.save('Rundown_KKN_Semua_Minggu.pdf');
+                showToast('PDF berhasil diunduh!');
+            } catch (err) {
+                showToast('Gagal: ' + err.message, 'danger');
+                console.error('exportPDFAll error:', err);
+            }
         }
 
         // Toast Notification Helper
