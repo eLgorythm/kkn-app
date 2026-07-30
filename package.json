@@ -1,7 +1,7 @@
 {
   "name": "kkn-wa-bot",
   "version": "1.0.0",
-  "description": "WhatsApp Bot untuk Rundown KKN Desa Sokaraja",
+  "description": "WhatsApp Bot untuk Matriks KKN Desa Sokaraja",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"

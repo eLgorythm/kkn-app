@@ -122,27 +122,42 @@ async function startBot() {
                                 `📈 *Total Selesai: ${percentage}%*`;
                 await sock.sendMessage(remoteJid, { text: progMsg }, { quoted: msg });
             }
-            else if (text === '!jadwal') {
+            else if (text.startsWith('!jadwal')) {
                 const data = await fetchRundownData();
                 if (data.length === 0) {
                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan." }, { quoted: msg });
                     return;
                 }
 
-                const activeItems = data.filter(i => i.status !== 'Selesai').slice(0, 5);
-                let jadwalMsg = `📅 *DAFTAR KEGIATAN KKN (Mendatang)*\n\n`;
+                const parts = text.split(/\s+/);
+                const weekParam = parseInt(parts[1]);
 
-                if (activeItems.length === 0) {
-                    jadwalMsg += `Semua kegiatan telah selesai! 🎉`;
+                let filtered = data;
+                let title = "📅 *DAFTAR KEGIATAN KKN (Mendatang)*\n\n";
+
+                if (!isNaN(weekParam) && weekParam >= 1 && weekParam <= 6) {
+                    filtered = data.filter(i => i.week === weekParam);
+                    title = `📅 *DAFTAR KEGIATAN KKN MINGGU KE-${weekParam}*\n\n`;
                 } else {
-                    activeItems.forEach((item, index) => {
-                        jadwalMsg += `${index + 1}. *${item.proker}*\n`;
+                    // Show up to 20 items (prioritizing Belum/Sedang, filling with Selesai up to 20)
+                    const active = data.filter(i => i.status !== 'Selesai');
+                    const done = data.filter(i => i.status === 'Selesai');
+                    filtered = [...active, ...done].slice(0, 20);
+                }
+
+                let jadwalMsg = title;
+
+                if (filtered.length === 0) {
+                    jadwalMsg += `Tidak ada kegiatan yang ditemukan.`;
+                } else {
+                    filtered.forEach((item, index) => {
+                        jadwalMsg += `${index + 1}. *[M${item.week}] ${item.proker}*\n`;
                         jadwalMsg += `   🗓️ ${item.date} (${item.time})\n`;
                         jadwalMsg += `   📝 ${item.activity}\n`;
                         jadwalMsg += `   Status: [${item.status || 'Belum'}]\n\n`;
                     });
                 }
-                jadwalMsg += `_Cek web KKN untuk detail selengkapnya._`;
+                jadwalMsg += `_Tip: Ketik !jadwal [1-6] untuk lihat per minggu (Cth: !jadwal 4)._`;
                 await sock.sendMessage(remoteJid, { text: jadwalMsg }, { quoted: msg });
             }
         } catch (err) {

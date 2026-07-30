@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rundown Kegiatan KKN - 0xfndLabs</title>
+    <title>Matriks Kegiatan KKN - 0xfndLabs</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -60,7 +60,7 @@
                             <i class="fa-regular fa-calendar-check mr-1"></i> Penerjunan: 4 Agustus 2026
                         </span>
                     </div>
-                    <h1 class="text-2xl sm:text-3xl font-bold mt-1 tracking-tight">Rundown Kegiatan KKN Desa Sokaraja</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold mt-1 tracking-tight">Matriks Kegiatan KKN Desa Sokaraja</h1>
                     <p class="text-indigo-200 text-sm mt-0.5">Jadwal Pelaksanaan Program Kerja Minggu 1 s/d Minggu 6</p>
                 </div>
                 <!-- Top Action Buttons -->
@@ -96,7 +96,7 @@
 
     <!-- Header Print Only -->
     <div class="hidden print-only p-6 border-b border-slate-300 mb-6">
-        <h1 class="text-2xl font-bold text-slate-900">DOKUMEN RUNDOWN KEGIATAN KKN DESA SOKARAJA</h1>
+        <h1 class="text-2xl font-bold text-slate-900">DOKUMEN MATRIKS KEGIATAN KKN DESA SOKARAJA</h1>
         <p class="text-sm text-slate-600 mt-1">Hari Penerjunan: Selasa, 4 Agustus 2026 | Periode Minggu 1 - Minggu 6</p>
     </div>
 
@@ -315,12 +315,18 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Hari / Tanggal</label>
-                        <input type="text" id="input-date" required placeholder="Contoh: Selasa, 25 Aug 2026" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tanggal</label>
+                        <input type="date" id="input-date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Waktu</label>
-                        <input type="text" id="input-time" required placeholder="Contoh: 09.00 – 12.00" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Jam Mulai</label>
+                            <input type="time" id="input-time-start" required class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Jam Selesai</label>
+                            <input type="time" id="input-time-end" required class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
                     </div>
                 </div>
 
@@ -548,6 +554,116 @@
         window.currentWeekFilter = 'all';
         window.scheduleData = scheduleData;
 
+        function parseIndonesianDate(dateStr, timeStr) {
+            if (!dateStr) return 0;
+            const months = {
+                'jan': 0, 'januari': 0,
+                'feb': 1, 'februari': 1,
+                'mar': 2, 'maret': 2,
+                'apr': 3, 'april': 3,
+                'mei': 4, 'may': 4,
+                'jun': 5, 'juni': 5,
+                'jul': 6, 'juli': 6,
+                'agu': 7, 'agustus': 7, 'aug': 7,
+                'sep': 8, 'september': 8,
+                'okt': 9, 'oktober': 9, 'oct': 9,
+                'nov': 10, 'november': 10,
+                'des': 11, 'desember': 11, 'dec': 11
+            };
+            const cleanStr = dateStr.toLowerCase().replace(/[^a-z0-9]/g, ' ');
+            const parts = cleanStr.split(/\s+/).filter(Boolean);
+            let day = 1, month = 0, year = 2026;
+            for (let p of parts) {
+                if (!isNaN(p)) {
+                    const num = parseInt(p);
+                    if (num > 31) year = num;
+                    else if (day === 1) day = num;
+                    else month = num;
+                } else if (months[p] !== undefined) {
+                    month = months[p];
+                }
+            }
+            let hours = 0, minutes = 0;
+            if (timeStr) {
+                const timeMatch = timeStr.match(/(\d{1,2})[.:](\d{2})/);
+                if (timeMatch) {
+                    hours = parseInt(timeMatch[1]);
+                    minutes = parseInt(timeMatch[2]);
+                }
+            }
+            return new Date(year, month, day, hours, minutes).getTime();
+        }
+
+        function sortScheduleData(data) {
+            return data.sort((a, b) => {
+                if ((a.week || 1) !== (b.week || 1)) {
+                    return (a.week || 1) - (b.week || 1);
+                }
+                const timeA = parseIndonesianDate(a.date, a.time);
+                const timeB = parseIndonesianDate(b.date, b.time);
+                if (timeA !== timeB) {
+                    return timeA - timeB;
+                }
+                return String(a.id).localeCompare(String(b.id));
+            });
+        }
+
+        const daysArr = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const monthsArr = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        function formatDateToIndonesian(dateValue) {
+            if (!dateValue) return '';
+            const d = new Date(dateValue);
+            if (isNaN(d.getTime())) return dateValue;
+            return `${daysArr[d.getDay()]}, ${d.getDate()} ${monthsArr[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        function parseIndonesianDateToInputValue(dateStr) {
+            if (!dateStr) return '';
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+            const monthsMap = {
+                'jan': 0, 'januari': 0,
+                'feb': 1, 'februari': 1,
+                'mar': 2, 'maret': 2,
+                'apr': 3, 'april': 3,
+                'mei': 4, 'may': 4,
+                'jun': 5, 'juni': 5,
+                'jul': 6, 'juli': 6,
+                'agu': 7, 'agustus': 7, 'aug': 7,
+                'sep': 8, 'september': 8,
+                'okt': 9, 'oktober': 9, 'oct': 9,
+                'nov': 10, 'november': 10,
+                'des': 11, 'desember': 11, 'dec': 11
+            };
+            const cleanStr = dateStr.toLowerCase().replace(/[^a-z0-9]/g, ' ');
+            const parts = cleanStr.split(/\s+/).filter(Boolean);
+            let day = 1, month = 0, year = 2026;
+            for (let p of parts) {
+                if (!isNaN(p)) {
+                    const num = parseInt(p);
+                    if (num > 31) year = num;
+                    else if (day === 1) day = num;
+                    else month = num;
+                } else if (monthsMap[p] !== undefined) {
+                    month = monthsMap[p];
+                }
+            }
+            const mm = String(month + 1).padStart(2, '0');
+            const dd = String(day).padStart(2, '0');
+            return `${year}-${mm}-${dd}`;
+        }
+
+        function parseTimeToInputValues(timeStr) {
+            if (!timeStr) return { start: '', end: '' };
+            const matches = timeStr.match(/(\d{1,2})[.:](\d{2})/g);
+            if (!matches) return { start: '', end: '' };
+            const formatTime = (t) => t.replace('.', ':');
+            return {
+                start: formatTime(matches[0] || ''),
+                end: formatTime(matches[1] || '')
+            };
+        }
+
         // Check if firebase is configured
         const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
@@ -567,8 +683,8 @@
                         });
                     });
                     
-                    // Sort items by ID for standard sequence
-                    scheduleData.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+                    // Sort items chronologically by week, date, time
+                    sortScheduleData(scheduleData);
                     window.scheduleData = scheduleData;
                     if (typeof window.renderTable === 'function') {
                         window.renderTable();
@@ -580,6 +696,7 @@
             } catch (e) {
                 console.error("Firebase init error:", e);
                 scheduleData = [...defaultDataset];
+                sortScheduleData(scheduleData);
                 window.scheduleData = scheduleData;
                 if (typeof window.renderTable === 'function') {
                     window.renderTable();
@@ -588,6 +705,7 @@
         } else {
             // Local fallback dataset if Firebase key is placeholder
             scheduleData = [...defaultDataset];
+            sortScheduleData(scheduleData);
             window.scheduleData = scheduleData;
             if (typeof window.renderTable === 'function') {
                 window.renderTable();
@@ -637,12 +755,17 @@
             event.preventDefault();
             const id = document.getElementById('item-id').value;
             const week = parseInt(document.getElementById('input-week').value);
-            const date = document.getElementById('input-date').value.trim();
-            const time = document.getElementById('input-time').value.trim();
+            const dateRaw = document.getElementById('input-date').value;
+            const timeStart = document.getElementById('input-time-start').value;
+            const timeEnd = document.getElementById('input-time-end').value;
             const proker = document.getElementById('input-proker').value.trim();
             const priority = document.getElementById('input-priority').value;
             const status = document.getElementById('input-status').value;
             const activity = document.getElementById('input-activity').value.trim();
+
+            const date = formatDateToIndonesian(dateRaw);
+            const formatTimePart = (t) => t ? t.replace(':', '.') : '';
+            const time = (timeStart && timeEnd) ? `${formatTimePart(timeStart)} – ${formatTimePart(timeEnd)}` : (timeStart || '');
 
             const docId = id ? String(id) : 'kkn_' + Date.now();
             const dataObj = { week, date, time, proker, priority, status, activity, updatedAt: new Date().toISOString() };
@@ -661,6 +784,8 @@
                 } else {
                     scheduleData.push({ id: docId, ...dataObj });
                 }
+                sortScheduleData(scheduleData);
+                window.scheduleData = scheduleData;
                 showToast('Tersimpan di memori lokal');
                 if (typeof window.renderTable === 'function') window.renderTable();
             }
@@ -982,8 +1107,10 @@
             document.getElementById('modal-title').innerText = 'Edit Kegiatan KKN';
             document.getElementById('item-id').value = item.id;
             document.getElementById('input-week').value = item.week;
-            document.getElementById('input-date').value = item.date;
-            document.getElementById('input-time').value = item.time;
+            document.getElementById('input-date').value = parseIndonesianDateToInputValue(item.date);
+            const times = parseTimeToInputValues(item.time);
+            document.getElementById('input-time-start').value = times.start;
+            document.getElementById('input-time-end').value = times.end;
             document.getElementById('input-proker').value = item.proker;
             document.getElementById('input-priority').value = item.priority || 'Sedang';
             document.getElementById('input-status').value = item.status || 'Belum';
@@ -1011,7 +1138,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Rundown_KKN.csv");
+            link.setAttribute("download", "Matriks_KKN.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1026,7 +1153,7 @@
             const total = dataList.length;
             const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
             
-            let text = `📢 *RUNDOWN KKN DESA SOKARAJA*\n`;
+            let text = `📢 *MATRIKS KKN DESA SOKARAJA*\n`;
             text += `📅 Status Progress: *${percentage}% Selesai* (${completed}/${total} Kegiatan)\n\n`;
             text += `Cek jadwal lengkap & update kegiatan KKN di web:\n${window.location.href}\n\n*#KKNSokaraja #0xfndLabs*`;
             
