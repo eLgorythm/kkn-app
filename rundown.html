@@ -72,10 +72,6 @@
                         <i class="fa-solid fa-database"></i>
                         <span>SQL Setup</span>
                     </button>
-                    <button onclick="applyPresetTemplate()" title="Muat Contoh Jadwal Ideal KKN 1 Minggu" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span>Sync Template Cloud</span>
-                    </button>
                     <button onclick="openWAModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
                         <span>Format WA Hari Ini</span>
@@ -453,41 +449,10 @@ WITH CHECK (true);</pre>
         let selectedDayFilter = 'all';
         let scheduleData = [];
 
-        // Sample Template 1 Week Data
-        const SAMPLE_PRESET_WEEK = [
-            // Senin (Hari 1)
-            { id: '101', week: 1, day: 'Senin', time: '06.00 - 07.30', title: 'Piket Posko & Sarapan Bersama', category: 'Rutinitas Posko', location: 'Posko Utama', pj: 'Divisi Konsumsi & Piket Tim A', status: 'Selesai', notes: 'Menyiapkan bahan makanan' },
-            { id: '102', week: 1, day: 'Senin', time: '08.00 - 10.30', title: 'Sowan & Silaturahmi Kepala Desa & Perangkat', category: 'Sosialisasi/Humas', location: 'Kantor Balai Desa', pj: 'Kordes & Sekretaris', status: 'Selesai', notes: 'Bawa berkas proposal & daftar nama mahasiswa' },
-            { id: '103', week: 1, day: 'Senin', time: '10.30 - 12.00', title: 'Observasi Lapangan RT 01 - RT 04', category: 'Proker Utama', location: 'Wilayah Dusun 1', pj: 'Divisi Humas & Lapangan', status: 'Selesai', notes: 'Pemetaan potensi lokal & masalah warga' },
-            { id: '104', week: 1, day: 'Senin', time: '13.30 - 16.00', title: 'Pendataan UMKM Desa (Kerajinan & Kuliner)', category: 'Proker Utama', location: 'Dusun Sukamaju', pj: 'Divisi Ekonomi & Ekraf', status: 'Belum', notes: 'Membawa kuisioner pendataan UMKM' },
-            { id: '105', week: 1, day: 'Senin', time: '19.30 - 21.00', title: 'Briefing Evaluasi Harian & Reorganisasi Piket', category: 'Evaluasi & Piket', location: 'Ruang Tengah Posko', pj: 'Seluruh Anggota', status: 'Belum', notes: 'Notulensi oleh Sekretaris' },
-
-            // Selasa (Hari 2)
-            { id: '201', week: 1, day: 'Selasa', time: '06.00 - 07.30', title: 'Olahraga Pagi & Senam Bersama Anak-Anak', category: 'Rutinitas Posko', location: 'Halaman Posko', pj: 'Divisi Olahraga & Kesra', status: 'Belum', notes: 'Siapkan speaker portable' },
-            { id: '202', week: 1, day: 'Selasa', time: '08.30 - 11.30', title: 'Pendampingan Posyandu Balita & Lansia', category: 'Proker Utama', location: 'Poskesdes / Posyandu Dusun 2', pj: 'Divisi Kesehatan', status: 'Belum', notes: 'Bantu pengukuran TB/BB & pencatatan' },
-            { id: '203', week: 1, day: 'Selasa', time: '14.00 - 16.30', title: 'Mengajar Bimbel Gratis (Matematika & B. Inggris)', category: 'Proker Pendukung', location: 'Posko KKN', pj: 'Divisi Pendidikan', status: 'Belum', notes: 'Target anak SD kelas 1-6' },
-            { id: '204', week: 1, day: 'Selasa', time: '19.30 - 21.00', title: 'Pengajian Rutin Ibu-Ibu & Perkenalan Tim', category: 'Sosialisasi/Humas', location: 'Musholla Al-Ikhlas', pj: 'Humas & Kordes', status: 'Belum', notes: 'Pakaian rapi muslim/muslimah' },
-
-            // Rabu (Hari 3)
-            { id: '301', week: 1, day: 'Rabu', time: '08.00 - 11.30', title: 'Kerja Bakti Pembersihan Drainase & Posko', category: 'Proker Pendukung', location: 'Lingkungan RT 02', pj: 'Divisi Lingkungan & Karang Taruna', status: 'Belum', notes: 'Koordinasi dengan Ketua RT' },
-            { id: '302', week: 1, day: 'Rabu', time: '13.00 - 15.30', title: 'Pelatihan Branding & Kemasan UMKM', category: 'Proker Utama', location: 'Balai Desa', pj: 'Divisi Ekonomi & Digital', status: 'Belum', notes: 'Siapkan sampel kemasan & laptop' },
-
-            // Kamis (Hari 4)
-            { id: '401', week: 1, day: 'Kamis', time: '08.00 - 11.00', title: 'Sosialisasi Perilaku Hidup Bersih & Sehat (PHBS)', category: 'Proker Utama', location: 'SD Negeri 1 Desa', pj: 'Divisi Kesehatan & Pendidikan', status: 'Belum', notes: 'Membawa sabun cuci tangan & peraga' },
-            { id: '402', week: 1, day: 'Kamis', time: '13.30 - 16.00', title: 'Survei Lokasi Pemasangan Plang Penunjuk Jalan', category: 'Proker Pendukung', location: 'Persimpangan Utama Desa', pj: 'Divisi Sarpras', status: 'Belum', notes: 'Ukur titik koordinat & kondisi tiang' },
-
-            // Jumat (Hari 5)
-            { id: '501', week: 1, day: 'Jumat', time: '08.00 - 11.00', title: 'Jumat Bersih Masjid & Persiapan Jumatan', category: 'Rutinitas Posko', location: 'Masjid Agung Desa', pj: 'Tim Piket Jumat', status: 'Belum', notes: 'Bawa alat kebersihan posko' },
-            { id: '502', week: 1, day: 'Jumat', time: '13.30 - 16.00', title: 'Kunjungan Koordinasi DPL (Dosen Pembimbing)', category: 'Sosialisasi/Humas', location: 'Posko Utama', pj: 'Kordes & Tim', status: 'Belum', notes: 'Siapkan draft laporan mingguan' },
-
-            // Sabtu (Hari 6)
-            { id: '601', week: 1, day: 'Sabtu', time: '08.00 - 12.00', title: 'Lomba Anak-Anak & Pemutaran Film Edukasi', category: 'Proker Pendukung', location: 'Lapangan Desa', pj: 'Divisi Acara & Pemuda', status: 'Belum', notes: 'Siapkan hadiah & proyektor' },
-            { id: '602', week: 1, day: 'Sabtu', time: '19.30 - 21.30', title: 'Rapat Koordinasi Mingguan dengan Pemuda/Karang Taruna', category: 'Evaluasi & Piket', location: 'Gedung Serbaguna', pj: 'Kordes & Humas', status: 'Belum', notes: 'Bahasa persiapan acara puncak' },
-
-            // Minggu (Hari 7)
-            { id: '701', week: 1, day: 'Minggu', time: '07.00 - 10.00', title: 'Jalan Sehat & Senam Masal Warga Desa', category: 'Proker Utama', location: 'Start Balai Desa', pj: 'Seluruh Panitia KKN', status: 'Belum', notes: 'Kupon doorprize & konsumsi' },
-            { id: '702', week: 1, day: 'Minggu', time: '19.30 - 21.00', title: 'Evaluasi Pekan 1 & Penyusunan Laporan Mingguan', category: 'Evaluasi & Piket', location: 'Posko KKN', pj: 'Sekretaris & Bendahara', status: 'Belum', notes: 'Rekapitulasi keuangan & absensi' }
-        ];
+        window.addEventListener('DOMContentLoaded', async () => {
+            await fetchSupabaseData();
+            setupRealtimeSubscription();
+        });
 
         window.addEventListener('DOMContentLoaded', async () => {
             await fetchSupabaseData();
@@ -520,11 +485,8 @@ WITH CHECK (true);</pre>
                     isCloudConnected = true;
                     updateStatusBadge('connected', 'Supabase Cloud: Terhubung Live');
                 } else {
-                    // Database empty, upload defaults
-                    scheduleData = [...SAMPLE_PRESET_WEEK];
-                    isCloudConnected = true;
-                    updateStatusBadge('connected', 'Supabase Cloud: Terhubung (Kosong)');
-                    await uploadPresetToSupabase();
+                    scheduleData = [];
+                    renderSchedule();
                 }
                 renderSchedule();
             } catch (err) {
@@ -589,48 +551,16 @@ WITH CHECK (true);</pre>
                 try {
                     scheduleData = JSON.parse(stored);
                 } catch(e) {
-                    scheduleData = [...SAMPLE_PRESET_WEEK];
+                    scheduleData = [];
                 }
             } else {
-                scheduleData = [...SAMPLE_PRESET_WEEK];
+                scheduleData = [];
                 saveLocalData();
             }
         }
 
         function saveLocalData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleData));
-        }
-
-        // Bulk Upload Template to Supabase
-        async function uploadPresetToSupabase() {
-            if (!supabaseClient || !isCloudConnected) return;
-
-            try {
-                const { error } = await supabaseClient
-                    .from('kkn_rundown')
-                    .upsert(scheduleData, { onConflict: 'id' });
-
-                if (error) {
-                    console.error("Error upserting preset:", error);
-                } else {
-                    showToast("Template 1 Minggu tersimpan ke Supabase Cloud!");
-                }
-            } catch (err) {
-                console.error("Error syncing preset:", err);
-            }
-        }
-
-        // Apply Preset Template
-        async function applyPresetTemplate() {
-            scheduleData = JSON.parse(JSON.stringify(SAMPLE_PRESET_WEEK));
-            saveLocalData();
-            renderSchedule();
-            
-            if (supabaseClient && isCloudConnected) {
-                await uploadPresetToSupabase();
-            } else {
-                showToast("Template Rundown 1 Minggu berhasil dimuat (Lokal)!");
-            }
         }
 
         async function saveActivity(e) {
