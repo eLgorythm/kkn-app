@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
@@ -84,15 +85,15 @@
                         <i class="fa-solid fa-file-excel"></i>
                         <span>Export CSV</span>
                     </button>
-<button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-lg text-xs transition-all flex items-center space-x-1.5 border border-white/20">
-                         <i class="fa-solid fa-print"></i>
-                         <span>Cetak</span>
-                     </button>
-                     <a href="index.html" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
-                         <i class="fa-solid fa-table-cells"></i>
-                         <span>Matriks Kegiatan</span>
-                     </a>
-                 </div>
+                    <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-lg text-xs transition-all flex items-center space-x-1.5 border border-white/20">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak</span>
+                    </button>
+                    <a href="index.html" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-table-cells"></i>
+                        <span>Matriks Kegiatan</span>
+                    </a>
+                </div>
 
             </div>
         </div>
@@ -373,7 +374,7 @@
         <!-- ... existing modal-wa code ... -->
     </div>
 
-    <!-- Supabase SQL Setup Modal -->
+        <!-- Supabase SQL Setup Modal -->
     <div id="modal-sql" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in duration-200">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -432,6 +433,9 @@ WITH CHECK (true);</pre>
     </div>
 
     <script>
+        // ==========================================
+        // SUPABASE CONFIGURATION
+        // ==========================================
         const SUPABASE_URL = "https://mtxtfkivxmpnsakktzpw.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10eHRma2l2xM3A2YWtrdHpB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MDc1MDIsImV4cCI6MjEwMDk4MzUwMn0.XQul1dsbkvI96UFs93tF9mRuXHCrF5PmipGVaAizorE";
         
@@ -448,11 +452,6 @@ WITH CHECK (true);</pre>
         let currentWeek = 1;
         let selectedDayFilter = 'all';
         let scheduleData = [];
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            await fetchSupabaseData();
-            setupRealtimeSubscription();
-        });
 
         window.addEventListener('DOMContentLoaded', async () => {
             await fetchSupabaseData();
@@ -481,12 +480,13 @@ WITH CHECK (true);</pre>
 
                 if (data && data.length > 0) {
                     scheduleData = data;
-                    saveLocalData(); // Sync cache
+                    saveLocalData();
                     isCloudConnected = true;
                     updateStatusBadge('connected', 'Supabase Cloud: Terhubung Live');
                 } else {
                     scheduleData = [];
-                    renderSchedule();
+                    updateStatusBadge('connected', 'Supabase Cloud: Terhubung (Kosong)');
+                    showToast("Database Kosong. Tambah kegiatan dari halaman Matriks.");
                 }
                 renderSchedule();
             } catch (err) {
@@ -516,7 +516,7 @@ WITH CHECK (true);</pre>
                             renderSchedule();
                         }
                     } else if (payload.eventType === 'DELETE') {
-                        scheduleData = scheduleData.filter(i => i.id !== payload.old.id);
+                        scheduleData = scheduleData.filter(i => i.id === payload.old.id);
                         renderSchedule();
                     }
                 })
