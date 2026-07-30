@@ -226,11 +226,11 @@
                         Minggu 5 (Anti Bullying)
                     </button>
                     <button onclick="setWeekFilter(6)" id="tab-6" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
-                        Minggu 6 (Menabung dan Penutupan)
+                        Minggu 6 (Menabung)
                     </button>
                 </div>
 
-                <!-- Search & Proker Dropdown Filter -->
+                <!-- Search, Filter & Export -->
                 <div class="flex flex-col sm:flex-row gap-2.5">
                     <div class="relative flex-1 sm:w-64">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -268,6 +268,57 @@
                         <option value="Penyusunan Laporan">Penyusunan Laporan</option>
                         <option value="Penutupan & Penarikan">Penutupan & Penarikan</option>
                     </select>
+                </div>
+
+                <!-- Export Per-Week -->
+                <div class="flex flex-wrap gap-1.5 no-print">
+                    <button onclick="exportCSVWeek('all')" title="Export CSV Semua Minggu" class="bg-indigo-700 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <span>CSV Semua</span>
+                    </button>
+                    <button onclick="exportCSVWeek(1)" title="Export CSV Minggu 1" class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow transition-all">
+                        M1 CSV
+                    </button>
+                    <button onclick="exportCSVWeek(2)" title="Export CSV Minggu 2" class="bg-rose-500 hover:bg-rose-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow transition-all">
+                        M2 CSV
+                    </button>
+                    <button onclick="exportCSVWeek(3)" title="Export CSV Minggu 3" class="bg-sky-500 hover:bg-sky-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow transition-all">
+                        M3 CSV
+                    </button>
+                    <button onclick="exportCSVWeek(4)" title="Export CSV Minggu 4" class="bg-purple-500 hover:bg-purple-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow transition-all">
+                        M4 CSV
+                    </button>
+                    <button onclick="exportCSVWeek(5)" title="Export CSV Minggu 5" class="bg-teal-500 hover:bg-teal-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow transition-all">
+                        M5 CSV
+                    </button>
+                    <button onclick="exportCSVWeek(6)" title="Export CSV Minggu 6" class="bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow transition-all">
+                        M6 CSV
+                    </button>
+                    <button onclick="exportPDFWeek('all')" title="PDF Semua Minggu" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>PDF Semua</span>
+                    </button>
+                </div>
+
+                <!-- Single week export dropdown -->
+                <div class="flex gap-1.5 no-print">
+                    <select id="export-week-select" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">Semua Minggu</option>
+                        <option value="1">Minggu 1</option>
+                        <option value="2">Minggu 2</option>
+                        <option value="3">Minggu 3</option>
+                        <option value="4">Minggu 4</option>
+                        <option value="5">Minggu 5</option>
+                        <option value="6">Minggu 6</option>
+                    </select>
+                    <button onclick="exportSelectedCSV()" title="Export CSV Terpilih" class="bg-indigo-700 hover:bg-indigo-600 text-white font-medium px-3 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <span>CSV</span>
+                    </button>
+                    <button onclick="exportSelectedPDF()" title="Export PDF Terpilih" class="bg-red-600 hover:bg-red-700 text-white font-medium px-3 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>PDF</span>
+                    </button>
                 </div>
 
             </div>
@@ -1003,13 +1054,71 @@
             document.getElementById('item-modal').classList.remove('hidden');
         }
 
-        // Export to CSV Function
+        // Export CSV (all weeks in single file, split by week)
         function exportToCSV() {
+            exportCSVAllSplit();
+        }
+
+        function exportCSVAllSplit() {
             const dataList = window.scheduleData || [];
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Hari/Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
 
-            dataList.forEach(item => {
+            const weeks = [1, 2, 3, 4, 5, 6];
+            let totalExported = 0;
+
+            weeks.forEach((w, idx) => {
+                const wData = dataList.filter(i => i.week === w);
+                if (wData.length === 0) return;
+
+                // Week separator comment in CSV
+                if (idx > 0 && totalExported > 0) {
+                    csvContent += "\n";
+                }
+                csvContent += `# === MINGGU ${w} ===\n`;
+                csvContent += "# Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
+
+                wData.forEach(item => {
+                    const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
+                    const cleanTime = `"${item.time.replace(/"/g, '""')}"`;
+                    const cleanPriority = `"${(item.priority || 'Sedang').replace(/"/g, '""')}"`;
+                    const cleanProker = `"${item.proker.replace(/"/g, '""')}"`;
+                    const cleanActivity = `"${item.activity.replace(/"/g, '""')}"`;
+                    const cleanStatus = `"${(item.status || 'Belum').replace(/"/g, '""')}"`;
+                    csvContent += `${cleanDate},${cleanTime},${cleanPriority},${cleanProker},${cleanActivity},${cleanStatus}\n`;
+                });
+
+                totalExported += wData.length;
+            });
+
+            if (totalExported === 0) {
+                showToast('Tidak ada data untuk di-export.', 'info');
+                return;
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Matriks_KKN_Semua_Minggu.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast(`CSV semua minggu berhasil diunduh (${totalExported} kegiatan)`);
+        }
+
+        function exportCSVWeek(week) {
+            const dataList = window.scheduleData || [];
+            let filtered = dataList;
+
+            if (week !== 'all') {
+                filtered = dataList.filter(i => i.week === parseInt(week));
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Hari/Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
+
+            filtered.forEach(item => {
                 const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
                 const cleanTime = `"${item.time.replace(/"/g, '""')}"`;
                 const cleanPriority = `"${(item.priority || 'Sedang').replace(/"/g, '""')}"`;
@@ -1019,18 +1128,121 @@
                 csvContent += `${cleanDate},${cleanTime},${cleanPriority},${cleanProker},${cleanActivity},${cleanStatus}\n`;
             });
 
+            const weekLabel = week === 'all' ? 'Semua' : `Minggu_${week}`;
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Matriks_KKN.csv");
+            link.setAttribute("download", `Matriks_KKN_${weekLabel}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            showToast('File CSV berhasil diunduh');
+            showToast(`CSV ${weekLabel} berhasil diunduh`);
         }
 
-        // Toast Notification System
+        function exportSelectedCSV() {
+            const week = document.getElementById('export-week-select').value;
+            exportCSVWeek(week === 'all' ? 'all' : parseInt(week));
+        }
+
+        function exportSelectedPDF() {
+            const week = document.getElementById('export-week-select').value;
+            exportPDFWeek(week === 'all' ? 'all' : parseInt(week));
+        }
+
+        function exportPDFWeek(week) {
+            const dataList = window.scheduleData || [];
+            const weeks = [1, 2, 3, 4, 5, 6];
+
+            let title = "MATRIKS KEGIATAN KKN - SEMUA MINGGU";
+            let sections = '';
+            let totalCount = 0;
+
+            weeks.forEach(w => {
+                const wData = dataList.filter(i => i.week === w);
+                totalCount += wData.length;
+
+                sections += `
+                <div style="page-break-after: always; margin-bottom: 20px;">
+                    <h2>MINGGU KE-${w}</h2>
+                    <p class="sub">Kegiatan: ${wData.length} item</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hari/Tanggal</th>
+                                <th>Waktu</th>
+                                <th>Prioritas</th>
+                                <th>Proker</th>
+                                <th>Kegiatan</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${wData.map(item => `
+                                <tr>
+                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.date}</td>
+                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.time}</td>
+                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.priority || 'Sedang'}</td>
+                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.proker}</td>
+                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.activity}</td>
+                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.status || 'Belum'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+            });
+
+            if (totalCount === 0) {
+                showToast('Tidak ada data untuk di-export.', 'info');
+                return;
+            }
+
+            const printWindow = window.open('', '_blank', 'width=1200,height=800');
+            if (!printWindow) {
+                showToast('Popup diblokir! Izinkan popup untuk export PDF.', 'danger');
+                return;
+            }
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 20px; font-size: 11px; }
+                        h1 { font-size: 18px; margin-bottom: 4px; border-bottom: 2px solid #6366f1; padding-bottom: 8px; }
+                        .subtitle { color: #64748b; font-size: 12px; margin-bottom: 16px; }
+                        h2 { font-size: 14px; color: #4f46e5; margin: 20px 0 8px 0; }
+                        .sub { font-size: 10px; color: #94a3b8; margin-bottom: 6px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+                        th { background: #f1f5f9; padding: 5px 6px; border: 1px solid #cbd5e1; text-align: left; font-size: 10px; }
+                        td { font-size: 10px; }
+                        .print-only { display: block !important; }
+                        @media print {
+                            body { padding: 0; }
+                            @page { margin: 1cm; size: landscape; }
+                            h1 { font-size: 16px; }
+                            h2 { font-size: 13px; }
+                            div { page-break-after: always; }
+                            div:last-child { page-break-after: auto; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>${title}</h1>
+                    <p class="subtitle">Tanggal cetak: ${new Date().toLocaleDateString('id-ID')} | Total: ${totalCount} kegiatan</p>
+                    ${sections}
+                    <script>window.print();<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+
+            showToast(`Membuka PDF per minggu (1 file)...`);
+        }
+// Toast Notification System
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toast-message');
