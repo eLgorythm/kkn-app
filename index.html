@@ -25,22 +25,47 @@
                 background-color: white !important;
                 color: black !important;
                 padding: 0 !important;
+                font-size: 11px !important;
             }
             .shadow-card {
                 box-shadow: none !important;
                 border: 1px solid #cbd5e1 !important;
             }
+            .overflow-x-auto {
+                overflow-x: visible !important;
+            }
             table {
                 width: 100% !important;
                 border-collapse: collapse !important;
+                table-layout: auto !important;
+                font-size: 10px !important;
             }
             th, td {
                 border: 1px solid #94a3b8 !important;
-                padding: 8px 10px !important;
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                page-break-inside: avoid !important;
             }
             th {
                 background-color: #f1f5f9 !important;
                 color: #0f172a !important;
+                position: sticky !important;
+                top: 0 !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+            }
+            thead {
+                display: table-header-group !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            @page {
+                margin: 1cm;
+                size: landscape;
             }
         }
     </style>
