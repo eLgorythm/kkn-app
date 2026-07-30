@@ -1061,22 +1061,22 @@
 
         function exportCSVAllSplit() {
             const dataList = window.scheduleData || [];
-            let csvContent = "data:text/csv;charset=utf-8,";
+            let csvContent = "";
             csvContent += "Hari/Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
 
             const weeks = [1, 2, 3, 4, 5, 6];
             let totalExported = 0;
+            let firstWeek = true;
 
-            weeks.forEach((w, idx) => {
+            weeks.forEach((w) => {
                 const wData = dataList.filter(i => i.week === w);
                 if (wData.length === 0) return;
 
-                // Week separator comment in CSV
-                if (idx > 0 && totalExported > 0) {
+                // Add blank row separator between weeks (except before first)
+                if (!firstWeek) {
                     csvContent += "\n";
                 }
-                csvContent += `# === MINGGU ${w} ===\n`;
-                csvContent += "# Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
+                firstWeek = false;
 
                 wData.forEach(item => {
                     const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
@@ -1211,29 +1211,34 @@
                     <meta charset="UTF-8">
                     <title>${title}</title>
                     <style>
-                        body { font-family: sans-serif; padding: 20px; font-size: 11px; }
-                        h1 { font-size: 18px; margin-bottom: 4px; border-bottom: 2px solid #6366f1; padding-bottom: 8px; }
-                        .subtitle { color: #64748b; font-size: 12px; margin-bottom: 16px; }
-                        h2 { font-size: 14px; color: #4f46e5; margin: 20px 0 8px 0; }
-                        .sub { font-size: 10px; color: #94a3b8; margin-bottom: 6px; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-                        th { background: #f1f5f9; padding: 5px 6px; border: 1px solid #cbd5e1; text-align: left; font-size: 10px; }
-                        td { font-size: 10px; }
-                        .print-only { display: block !important; }
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
+                        body { font-family: 'Segoe UI', sans-serif; padding: 24px; font-size: 11px; background: white; color: #1e293b; }
+                        h1 { font-size: 20px; margin-bottom: 2px; color: #312e81; }
+                        .header-line { border-bottom: 3px solid #6366f1; margin-bottom: 8px; }
+                        .subtitle { color: #64748b; font-size: 11px; margin-bottom: 18px; }
+                        .week-section { margin-bottom: 28px; page-break-after: always; }
+                        .week-section:last-child { page-break-after: auto; }
+                        .week-title { font-size: 15px; font-weight: 700; color: #4f46e5; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 2px solid #c7d2fe; }
+                        .week-count { font-size: 10px; color: #94a3b8; margin-bottom: 8px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th { background: #4f46e5; color: white; padding: 6px 8px; border: 1px solid #4338ca; text-align: left; font-size: 10px; font-weight: 600; }
+                        td { padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 10px; }
+                        tr:nth-child(even) { background: #f8fafc; }
+                        .footer { margin-top: 24px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; text-align: center; }
                         @media print {
-                            body { padding: 0; }
-                            @page { margin: 1cm; size: landscape; }
-                            h1 { font-size: 16px; }
-                            h2 { font-size: 13px; }
-                            div { page-break-after: always; }
-                            div:last-child { page-break-after: auto; }
+                            body { padding: 12px; }
+                            @page { margin: 1.2cm; size: landscape; }
+                            .week-section { page-break-after: always; }
+                            .week-section:last-child { page-break-after: auto; }
                         }
                     </style>
                 </head>
                 <body>
                     <h1>${title}</h1>
-                    <p class="subtitle">Tanggal cetak: ${new Date().toLocaleDateString('id-ID')} | Total: ${totalCount} kegiatan</p>
+                    <div class="header-line"></div>
+                    <p class="subtitle">Tanggal cetak: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | Total seluruh kegiatan: ${totalCount}</p>
                     ${sections}
+                    <div class="footer">Matriks Kegiatan KKN Desa Sokaraja - 0xfndLabs</div>
                     <script>window.print();<\/script>
                 </body>
                 </html>
