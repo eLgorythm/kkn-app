@@ -573,7 +573,18 @@ WITH CHECK (true);</pre>
                     if (error) throw error;
                     showToast(editId ? "Agenda diperbarui di Cloud Supabase!" : "Agenda tersimpan ke Cloud Supabase!");
                 } catch (err) {
-                    console.error("Supabase Save Error:", err);
+                    const { data, error } = await supabaseClient
+                        .from('kkn_rundown')
+                        .upsert([newItem], { onConflict: 'id' })
+                        .select();
+
+                    console.log("DATA:", data);
+                    console.log("ERROR:", error);
+
+                    if (error) {
+                        console.error(error);
+                        alert(JSON.stringify(error, null, 2));
+                    }
                     showToast("Tersimpan di Lokal (Gagal sync ke Cloud)");
                 }
             } else {
@@ -596,18 +607,7 @@ WITH CHECK (true);</pre>
                         if (error) throw error;
                         showToast("Agenda terhapus dari Cloud Supabase.");
                     } catch (err) {
-                        const { data, error } = await supabaseClient
-                            .from('kkn_rundown')
-                            .upsert([newItem], { onConflict: 'id' })
-                            .select();
-
-                        console.log("DATA:", data);
-                        console.log("ERROR:", error);
-
-                        if (error) {
-                            console.error(error);
-                            alert(JSON.stringify(error, null, 2));
-                        }
+                        console.error("Supabase Delete Error:", err);
                         showToast("Terhapus dari Lokal.");
                     }
                 } else {
