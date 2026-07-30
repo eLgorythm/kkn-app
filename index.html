@@ -1035,111 +1035,120 @@
 
         // Export PDF Function (all data in one file, per-week sections)
         function exportPDFAll() {
-            const dataList = window.scheduleData || [];
-            const weeks = [1, 2, 3, 4, 5, 6];
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            try {
+                const dataList = window.scheduleData || [];
+                const weeks = [1, 2, 3, 4, 5, 6];
 
-            const pageW = doc.internal.pageSize.getWidth();
+                if (typeof window.jspdf === 'undefined') {
+                    showToast('jsPDF library tidak tersedia. Periksa koneksi internet.', 'danger');
+                    return;
+                }
 
-            let totalCount = 0;
-            let firstPage = true;
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-            weeks.forEach((w, idx) => {
-                const wData = dataList.filter(i => i.week === w);
-                if (wData.length === 0) return;
-                totalCount += wData.length;
+                const pageW = doc.internal.pageSize.getWidth();
 
-                if (!firstPage) doc.addPage();
-                firstPage = false;
+                let totalCount = 0;
+                let firstPage = true;
 
-                // Title
-                doc.setFontSize(16);
-                doc.setTextColor(49, 46, 129);
-                doc.text('MATRIKS KEGIATAN KKN - MINGGU KE-' + w, pageW / 2, 20, { align: 'center' });
+                weeks.forEach((w, idx) => {
+                    const wData = dataList.filter(i => String(i.week) === String(w));
+                    if (wData.length === 0) return;
+                    totalCount += wData.length;
 
-                // Divider
-                doc.setDrawColor(99, 102, 241);
-                doc.setLineWidth(1.5);
-                doc.line(14, 24, pageW - 14, 24);
+                    if (!firstPage) doc.addPage();
+                    firstPage = false;
 
-                // Subtitle
-                doc.setFontSize(9);
-                doc.setTextColor(100, 116, 139);
-                doc.text('Kegiatan: ' + wData.length + ' item', 14, 32);
+                    doc.setFontSize(16);
+                    doc.setTextColor(49, 46, 129);
+                    doc.text('MATRIKS KEGIATAN KKN - MINGGU KE-' + w, pageW / 2, 20, { align: 'center' });
 
-                // Sort data by date
-                const sorted = [...wData].sort((a, b) => parseDateString(a.date) - parseDateString(b.date));
+                    doc.setDrawColor(99, 102, 241);
+                    doc.setLineWidth(1.5);
+                    doc.line(14, 24, pageW - 14, 24);
 
-                const rows = sorted.map(item => [
-                    item.date,
-                    item.time,
-                    item.priority || 'Sedang',
-                    item.proker,
-                    item.activity,
-                    item.status || 'Belum'
-                ]);
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text('Kegiatan: ' + wData.length + ' item', 14, 32);
 
-                doc.autoTable({
-                    startY: 37,
-                    head: [['Hari/Tanggal', 'Waktu', 'Prioritas', 'Proker', 'Kegiatan', 'Status']],
-                    body: rows,
-                    theme: 'grid',
-                    headStyles: {
-                        fillColor: [79, 70, 229],
-                        textColor: [255, 255, 255],
-                        fontStyle: 'bold',
-                        fontSize: 9,
-                        halign: 'left'
-                    },
-                    bodyStyles: {
-                        fontSize: 8,
-                        textColor: [30, 41, 59]
-                    },
-                    alternateRowStyles: {
-                        fillColor: [248, 250, 252]
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 40 },
-                        1: { cellWidth: 22 },
-                        2: { cellWidth: 22 },
-                        3: { cellWidth: 40 },
-                        4: { cellWidth: 'auto' },
-                        5: { cellWidth: 22 }
-                    },
-                    margin: { left: 14, right: 14 },
-                    tableLineColor: [203, 213, 225],
-                    tableLineWidth: 0.5
+                    const sorted = [...wData].sort((a, b) => parseDateString(a.date) - parseDateString(b.date));
+
+                    const rows = sorted.map(item => [
+                        item.date,
+                        item.time,
+                        item.priority || 'Sedang',
+                        item.proker,
+                        item.activity,
+                        item.status || 'Belum'
+                    ]);
+
+                    if (typeof doc.autoTable !== 'function') {
+                        throw new Error('AutoTable plugin tidak terload.');
+                    }
+
+                    doc.autoTable({
+                        startY: 37,
+                        head: [['Hari/Tanggal', 'Waktu', 'Prioritas', 'Proker', 'Kegiatan', 'Status']],
+                        body: rows,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [79, 70, 229],
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            fontSize: 9,
+                            halign: 'left'
+                        },
+                        bodyStyles: {
+                            fontSize: 8,
+                            textColor: [30, 41, 59]
+                        },
+                        alternateRowStyles: {
+                            fillColor: [248, 250, 252]
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 40 },
+                            1: { cellWidth: 22 },
+                            2: { cellWidth: 22 },
+                            3: { cellWidth: 40 },
+                            4: { cellWidth: 'auto' },
+                            5: { cellWidth: 22 }
+                        },
+                        margin: { left: 14, right: 14 },
+                        tableLineColor: [203, 213, 225],
+                        tableLineWidth: 0.5
+                    });
                 });
-            });
 
-            if (totalCount === 0) {
-                showToast('Tidak ada data untuk di-export.', 'info');
-                return;
-            }
+                if (totalCount === 0) {
+                    showToast('Tidak ada data untuk di-export.', 'info');
+                    return;
+                }
 
-            // Footer on last page
-            const lastY = doc.lastAutoTable.finalY || 50;
-            doc.setFontSize(7);
-            doc.setTextColor(148, 163, 184);
-            doc.text('Matriks Kegiatan KKN Desa Sokaraja - 0xfndLabs', pageW / 2, lastY + 20, { align: 'center' });
-
-            // Global footer
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
+                const lastY = doc.lastAutoTable ? doc.lastAutoTable.finalY || 50 : 50;
                 doc.setFontSize(7);
                 doc.setTextColor(148, 163, 184);
-                doc.text(
-                    'Matriks Kegiatan KKN - 0xfndLabs | Halaman ' + i + ' dari ' + pageCount,
-                    pageW / 2,
-                    doc.internal.pageSize.getHeight() - 8,
-                    { align: 'center' }
-                );
-            }
+                doc.text('Matriks Kegiatan KKN Desa Sokaraja - 0xfndLabs', pageW / 2, lastY + 20, { align: 'center' });
 
-            doc.save('Matriks_Kegiatan_KKN_Semua_Minggu.pdf');
-            showToast('PDF berhasil diunduh!');
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(7);
+                    doc.setTextColor(148, 163, 184);
+                    doc.text(
+                        'Matriks Kegiatan KKN - 0xfndLabs | Halaman ' + i + ' dari ' + pageCount,
+                        pageW / 2,
+                        doc.internal.pageSize.getHeight() - 8,
+                        { align: 'center' }
+                    );
+                }
+
+                doc.save('Matriks_Kegiatan_KKN_Semua_Minggu.pdf');
+                showToast('PDF berhasil diunduh!');
+            } catch (err) {
+                showToast('Gagal: ' + err.message, 'danger');
+                console.error('exportPDFAll error:', err);
+            }
         }
 
 // Toast Notification System
