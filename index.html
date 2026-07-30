@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rundown Kegiatan KKN - 0xfndLabs</title>
+    <title>Matriks Kegiatan KKN - 0xfndLabs</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -60,7 +60,7 @@
                             <i class="fa-regular fa-calendar-check mr-1"></i> Penerjunan: 4 Agustus 2026
                         </span>
                     </div>
-                    <h1 class="text-2xl sm:text-3xl font-bold mt-1 tracking-tight">Rundown Kegiatan KKN Desa Sokaraja</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold mt-1 tracking-tight">Matriks Kegiatan KKN Desa Sokaraja</h1>
                     <p class="text-indigo-200 text-sm mt-0.5">Jadwal Pelaksanaan Program Kerja Minggu 1 s/d Minggu 6</p>
                 </div>
                 <!-- Top Action Buttons -->
@@ -92,7 +92,7 @@
 
     <!-- Header Print Only -->
     <div class="hidden print-only p-6 border-b border-slate-300 mb-6">
-        <h1 class="text-2xl font-bold text-slate-900">DOKUMEN RUNDOWN KEGIATAN KKN DESA SOKARAJA</h1>
+        <h1 class="text-2xl font-bold text-slate-900">DOKUMEN MATRIKS KEGIATAN KKN DESA SOKARAJA</h1>
         <p class="text-sm text-slate-600 mt-1">Hari Penerjunan: Selasa, 4 Agustus 2026 | Periode Minggu 1 - Minggu 6</p>
     </div>
 
@@ -191,13 +191,13 @@
                         Minggu 3 (Stunting)
                     </button>
                     <button onclick="setWeekFilter(4)" id="tab-4" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
-                        Minggu 4
+                        Minggu 4 (Proker UMKM)
                     </button>
                     <button onclick="setWeekFilter(5)" id="tab-5" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
-                        Minggu 5
+                        Minggu 5 (Penyuluhan Anti Bullying)
                     </button>
                     <button onclick="setWeekFilter(6)" id="tab-6" class="tab-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
-                        Minggu 6
+                        Minggu 6 (Menabung dan Penutupan)
                     </button>
                 </div>
 
@@ -303,9 +303,9 @@
                         <option value="1">Minggu 1 (Sampah & Observasi)</option>
                         <option value="2">Minggu 2 (Agustusan & TPQ)</option>
                         <option value="3">Minggu 3 (Stunting)</option>
-                        <option value="4">Minggu 4</option>
-                        <option value="5">Minggu 5</option>
-                        <option value="6">Minggu 6</option>
+                        <option value="4">Minggu 4 (Proker UMKM)</option>
+                        <option value="5">Minggu 5 (Penyuluhan Anti Bullying)</option>
+                        <option value="6">Minggu 6 (Sistem Menabung di SD)</option>
                     </select>
                 </div>
 
@@ -980,7 +980,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Rundown_KKN.csv");
+            link.setAttribute("download", "Matriks_KKN.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
