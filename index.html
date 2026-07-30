@@ -627,6 +627,12 @@
 
         function formatDateToIndonesian(dateValue) {
             if (!dateValue) return '';
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+                const [y, m, d] = dateValue.split('-').map(Number);
+                const localDate = new Date(y, m - 1, d);
+                if (isNaN(localDate.getTime())) return dateValue;
+                return `${daysArr[localDate.getDay()]}, ${localDate.getDate()} ${monthsArr[localDate.getMonth()]} ${localDate.getFullYear()}`;
+            }
             const d = new Date(dateValue);
             if (isNaN(d.getTime())) return dateValue;
             return `${daysArr[d.getDay()]}, ${d.getDate()} ${monthsArr[d.getMonth()]} ${d.getFullYear()}`;
