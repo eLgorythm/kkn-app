@@ -556,6 +556,18 @@
 
         function parseIndonesianDate(dateStr, timeStr) {
             if (!dateStr) return 0;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                const [y, m, d] = dateStr.split('-').map(Number);
+                let hours = 0, minutes = 0;
+                if (timeStr) {
+                    const timeMatch = timeStr.match(/(\d{1,2})[.:](\d{2})/);
+                    if (timeMatch) {
+                        hours = parseInt(timeMatch[1]);
+                        minutes = parseInt(timeMatch[2]);
+                    }
+                }
+                return new Date(y, m - 1, d, hours, minutes).getTime();
+            }
             const months = {
                 'jan': 0, 'januari': 0,
                 'feb': 1, 'februari': 1,
@@ -576,9 +588,11 @@
             for (let p of parts) {
                 if (!isNaN(p)) {
                     const num = parseInt(p);
-                    if (num > 31) year = num;
-                    else if (day === 1) day = num;
-                    else month = num;
+                    if (num > 31) {
+                        year = num;
+                    } else if (day === 1) {
+                        day = num;
+                    }
                 } else if (months[p] !== undefined) {
                     month = months[p];
                 }
@@ -641,9 +655,11 @@
             for (let p of parts) {
                 if (!isNaN(p)) {
                     const num = parseInt(p);
-                    if (num > 31) year = num;
-                    else if (day === 1) day = num;
-                    else month = num;
+                    if (num > 31) {
+                        year = num;
+                    } else if (day === 1) {
+                        day = num;
+                    }
                 } else if (monthsMap[p] !== undefined) {
                     month = monthsMap[p];
                 }
@@ -656,11 +672,11 @@
         function parseTimeToInputValues(timeStr) {
             if (!timeStr) return { start: '', end: '' };
             const matches = timeStr.match(/(\d{1,2})[.:](\d{2})/g);
-            if (!matches) return { start: '', end: '' };
+            if (!matches || matches.length === 0) return { start: '', end: '' };
             const formatTime = (t) => t.replace('.', ':');
             return {
                 start: formatTime(matches[0] || ''),
-                end: formatTime(matches[1] || '')
+                end: formatTime(matches[1] || matches[0] || '')
             };
         }
 
