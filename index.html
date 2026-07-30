@@ -1041,12 +1041,13 @@
             let sections = '';
             let totalCount = 0;
 
-            weeks.forEach(w => {
+            weeks.forEach((w, idx) => {
                 const wData = dataList.filter(i => i.week === w);
                 totalCount += wData.length;
+                const isLast = idx === weeks.length - 1;
 
                 sections += `
-                <div style="page-break-after: always; margin-bottom: 20px;">
+                <div style="${isLast ? '' : 'page-break-after: always;'} margin-bottom: 20px;">
                     <h2>MINGGU KE-${w}</h2>
                     <p class="sub">Kegiatan: ${wData.length} item</p>
                     <table>
@@ -1082,11 +1083,9 @@
             }
 
             const container = document.createElement('div');
-            container.style.position = 'absolute';
-            container.style.left = '-9999px';
-            container.style.top = '-9999px';
+            container.style.cssText = 'position:fixed;top:0;left:0;width:100%;z-index:-1;pointer-events:none;opacity:0.01;';
             container.innerHTML = `
-                <div style="font-family: sans-serif; padding: 24px; font-size: 11px; background: white; color: #1e293b;">
+                <div id="pdf-content" style="font-family: sans-serif; padding: 24px; font-size: 11px; background: white; color: #1e293b;">
                     <h1 style="font-size: 20px; margin-bottom: 2px; color: #312e81;">${title}</h1>
                     <div style="border-bottom: 3px solid #6366f1; margin-bottom: 8px;"></div>
                     <p style="color: #64748b; font-size: 11px; margin-bottom: 18px;">Tanggal cetak: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | Total seluruh kegiatan: ${totalCount}</p>
@@ -1096,21 +1095,25 @@
             `;
             document.body.appendChild(container);
 
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: 'Matriks_Kegiatan_KKN_Semua_Minggu.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, letterRendering: true, useCORS: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
+            showToast('Membuat PDF...', 'info');
 
-            html2pdf().from(container).set(opt).save().then(() => {
-                document.body.removeChild(container);
-                showToast('PDF berhasil diunduh!');
-            }).catch(err => {
-                document.body.removeChild(container);
-                showToast('Gagal membuat PDF: ' + err.message, 'danger');
+            requestAnimationFrame(() => {
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: 'Matriks_Kegiatan_KKN_Semua_Minggu.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, letterRendering: true, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+                    pagebreak: { mode: ['css'] }
+                };
+
+                html2pdf().from(container).set(opt).save().then(() => {
+                    document.body.removeChild(container);
+                    showToast('PDF berhasil diunduh!');
+                }).catch(err => {
+                    document.body.removeChild(container);
+                    showToast('Gagal membuat PDF: ' + err.message, 'danger');
+                });
             });
         }
 
