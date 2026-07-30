@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rundown Harian & 1 Minggu KKN</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .print-card { border: 1px solid #e2e8f0 !important; shadow: none !important; }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- Header Navigation -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-900 text-white shadow-lg sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                
+                <!-- Title & Subtitle -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 bg-indigo-600/80 rounded-xl flex items-center justify-center text-white shadow-inner border border-indigo-400/30">
+                        <i class="fa-solid fa-calendar-day text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl font-extrabold tracking-tight">Rundown Detail 1 Minggu KKN</h1>
+                            <span class="bg-indigo-500/30 text-indigo-200 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-indigo-400/30">Harian & Jam</span>
+                            <span id="db-status-badge" class="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span id="db-status-text">Supabase Connecting...</span>
+                            </span>
+                        </div>
+                        <p class="text-xs text-indigo-200/80">Manajemen jadwal operasional jam-demi-jam tim posko KKN (Terhubung Cloud Supabase)</p>
+                    </div>
+                </div>
+
+                <!-- Top Quick Action Buttons -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="openSqlModal()" title="Petunjuk Setup Tabel Supabase SQL" class="bg-indigo-800/80 hover:bg-indigo-700 text-indigo-100 font-semibold px-3 py-2 rounded-lg text-xs transition-all flex items-center space-x-1.5 border border-indigo-500/30">
+                        <i class="fa-solid fa-database"></i>
+                        <span>SQL Setup</span>
+                    </button>
+                    <button onclick="applyPresetTemplate()" title="Muat Contoh Jadwal Ideal KKN 1 Minggu" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Sync Template Cloud</span>
+                    </button>
+                    <button onclick="openWAModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>Format WA Hari Ini</span>
+                    </button>
+                    <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Agenda</span>
+                    </button>
+                    <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-3 py-2 rounded-lg text-xs transition-all flex items-center space-x-1.5 border border-slate-600">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Export CSV</span>
+                    </button>
+<button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-lg text-xs transition-all flex items-center space-x-1.5 border border-white/20">
+                         <i class="fa-solid fa-print"></i>
+                         <span>Cetak</span>
+                     </button>
+                     <a href="index.html" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow transition-all flex items-center space-x-2">
+                         <i class="fa-solid fa-table-cells"></i>
+                         <span>Matriks Kegiatan</span>
+                     </a>
+                 </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+
+        <!-- Week Selector & Day Tabs -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-4 no-print">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                
+                <!-- Week Choice Dropdown -->
+                <div class="flex items-center space-x-3">
+                    <label for="week-select" class="text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        <i class="fa-solid fa-layer-group text-indigo-600 mr-1"></i>Pilih Minggu:
+                    </label>
+                    <select id="week-select" onchange="changeWeek(this.value)" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg font-bold px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="1">Pekan 1: Pembekalan & Observasi Desa</option>
+                        <option value="2">Pekan 2: Pelaksanaan Proker Fisik & Non-Fisik</option>
+                        <option value="3">Pekan 3: Pendampingan & Pemberdayaan Mas</option>
+                        <option value="4">Pekan 4: Monitoring & Evaluasi Pertengahan</option>
+                        <option value="5">Pekan 5: Digitalisasi & Penyerahan Hasil</option>
+                        <option value="6">Pekan 6: Penutupan & Laporan Akhir</option>
+                    </select>
+                </div>
+
+                <!-- Day Filter Buttons -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar" id="day-tabs">
+                    <button onclick="filterByDay('all')" data-day="all" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-indigo-600 text-white shadow-sm">
+                        Semua Hari
+                    </button>
+                    <button onclick="filterByDay('Senin')" data-day="Senin" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+                        Senin (Hari 1)
+                    </button>
+                    <button onclick="filterByDay('Selasa')" data-day="Selasa" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+                        Selasa (Hari 2)
+                    </button>
+                    <button onclick="filterByDay('Rabu')" data-day="Rabu" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+                        Rabu (Hari 3)
+                    </button>
+                    <button onclick="filterByDay('Kamis')" data-day="Kamis" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+                        Kamis (Hari 4)
+                    </button>
+                    <button onclick="filterByDay('Jumat')" data-day="Jumat" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+                        Jumat (Hari 5)
+                    </button>
+                    <button onclick="filterByDay('Sabtu')" data-day="Sabtu" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+                        Sabtu (Hari 6)
+                    </button>
+                    <button onclick="filterByDay('Minggu')" data-day="Minggu" class="day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap">
+                        Minggu (Hari 7)
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Summary Analytics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
+            <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Agenda</span>
+                    <span id="stat-total" class="text-2xl font-black text-slate-800">0</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Selesai</span>
+                    <span id="stat-completed" class="text-2xl font-black text-emerald-600">0</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Sedang Jalan</span>
+                    <span id="stat-progress" class="text-2xl font-black text-amber-600">0</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-spinner"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">% Ketercapaian</span>
+                    <span id="stat-percentage" class="text-2xl font-black text-indigo-600">0%</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls & Search Bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-sm no-print">
+            <div class="relative w-full sm:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="search-input" oninput="renderSchedule()" placeholder="Cari kegiatan, PJ, lokasi..." class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+
+            <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                <select id="filter-status" onchange="renderSchedule()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
+                    <option value="all">Semua Status</option>
+                    <option value="Belum">Belum Mulai</option>
+                    <option value="Sedang Berlangsung">Sedang Berlangsung</option>
+                    <option value="Selesai">Selesai</option>
+                </select>
+
+                <select id="filter-category" onchange="renderSchedule()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
+                    <option value="all">Semua Kategori</option>
+                    <option value="Rutinitas Posko">Rutinitas Posko</option>
+                    <option value="Proker Utama">Proker Utama</option>
+                    <option value="Proker Pendukung">Proker Pendukung</option>
+                    <option value="Evaluasi & Piket">Evaluasi & Piket</option>
+                    <option value="Sosialisasi/Humas">Sosialisasi/Humas</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Main Schedule List Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden print-card">
+            
+            <!-- Card Header Print Friendly -->
+            <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+                <div>
+                    <h2 class="font-extrabold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
+                        <span>Jadwal Operasional Harian KKN</span>
+                        <span id="active-day-badge" class="bg-indigo-600 text-white text-xs px-2.5 py-0.5 rounded-md font-semibold">Semua Hari</span>
+                    </h2>
+                    <p class="text-xs text-slate-300 mt-0.5" id="week-subtitle-text">Pekan 1 - Rincian alokasi waktu dan perorangan PJ</p>
+                </div>
+                <div class="hidden sm:block text-right">
+                    <span class="text-xs text-slate-400 block font-mono">Status update: Real-time</span>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
+                            <th class="py-3 px-4 w-28">Hari</th>
+                            <th class="py-3 px-4 w-32">Waktu / Jam</th>
+                            <th class="py-3 px-4 w-36">Kategori</th>
+                            <th class="py-3 px-4 min-w-[220px]">Nama Kegiatan & Rincian</th>
+                            <th class="py-3 px-4 w-32">Lokasi</th>
+                            <th class="py-3 px-4 w-36">Penanggung Jawab (PJ)</th>
+                            <th class="py-3 px-4 w-28">Status</th>
+                            <th class="py-3 px-4 w-24 text-center no-print">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-tbody" class="divide-y divide-slate-100 text-xs">
+                        <!-- Dynamic schedule rows will be rendered here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="p-12 text-center hidden">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 text-2xl">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                </div>
+                <h3 class="font-bold text-slate-700 text-sm">Tidak ada jadwal ditemukan</h3>
+                <p class="text-slate-400 text-xs mt-1">Coba sesuaikan kata kunci pencarian atau ganti filter hari.</p>
+                <button onclick="openAddModal()" class="mt-4 inline-flex items-center space-x-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-indigo-700 transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Tambah Agenda Baru</span>
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Add/Edit Modal -->
+    <div id="modal-add" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in duration-200">
+            <!-- Modal Title Header -->
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 id="modal-title" class="font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-400"></i>
+                    <span>Tambah Agenda Harian</span>
+                </h3>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form Body -->
+            <form id="form-activity" onsubmit="saveActivity(event)" class="p-6 space-y-4">
+                <input type="hidden" id="edit-id">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Hari <span class="text-rose-500">*</span></label>
+                        <select id="input-day" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="Senin">Senin (Hari 1)</option>
+                            <option value="Selasa">Selasa (Hari 2)</option>
+                            <option value="Rabu">Rabu (Hari 3)</option>
+                            <option value="Kamis">Kamis (Hari 4)</option>
+                            <option value="Jumat">Jumat (Hari 5)</option>
+                            <option value="Sabtu">Sabtu (Hari 6)</option>
+                            <option value="Minggu">Minggu (Hari 7)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Rentang Waktu <span class="text-rose-500">*</span></label>
+                        <input type="text" id="input-time" placeholder="misal: 08.00 - 10.00" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kategori Agenda <span class="text-rose-500">*</span></label>
+                    <select id="input-category" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="Rutinitas Posko">Rutinitas Posko (Makan/Bersih/Piket)</option>
+                        <option value="Proker Utama">Proker Utama</option>
+                        <option value="Proker Pendukung">Proker Pendukung</option>
+                        <option value="Sosialisasi/Humas">Sosialisasi / Humas / Silaturahmi</option>
+                        <option value="Evaluasi & Piket">Evaluasi Malam / Briefing</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Agenda / Kegiatan <span class="text-rose-500">*</span></label>
+                    <input type="text" id="input-title" placeholder="misal: Mengajar Bimbel Anak SD Posko" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Lokasi</label>
+                        <input type="text" id="input-location" placeholder="misal: Balai Desa / Posko 1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Penanggung Jawab (PJ)</label>
+                        <input type="text" id="input-pj" placeholder="misal: Budi & Divisi Pendidikan" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Kegiatan</label>
+                        <select id="input-status" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="Belum">Belum Mulai</option>
+                            <option value="Sedang Berlangsung">Sedang Berlangsung</option>
+                            <option value="Selesai">Selesai</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Perlengkapan / Catatan</label>
+                        <input type="text" id="input-notes" placeholder="misal: Bawa proyektor & daftar hadir" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="pt-3 flex justify-end space-x-2 border-t border-slate-100">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow transition-all">
+                        Simpan Agenda
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- WhatsApp Export Modal -->
+    <div id="modal-wa" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden no-print">
+        <!-- ... existing modal-wa code ... -->
+    </div>
+
+    <!-- Supabase SQL Setup Modal -->
+    <div id="modal-sql" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in duration-200">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-database text-indigo-400 text-lg"></i>
+                    <h3 class="font-bold text-base">Setup Tabel Supabase (SQL Editor)</h3>
+                </div>
+                <button onclick="closeSqlModal()" class="text-slate-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-600">
+                    Jika data Supabase belum muncul, salin perintah SQL di bawah ini dan jalankan di menu <strong class="text-slate-800">SQL Editor</strong> di Dashboard Supabase Anda:
+                </p>
+                <div class="relative">
+                    <pre id="sql-code" class="bg-slate-900 text-emerald-400 p-4 rounded-xl text-[11px] font-mono leading-relaxed overflow-x-auto custom-scrollbar">CREATE TABLE IF NOT EXISTS kkn_rundown (
+  id TEXT PRIMARY KEY,
+  week INT DEFAULT 1,
+  day TEXT,
+  time TEXT,
+  category TEXT,
+  title TEXT,
+  location TEXT,
+  pj TEXT,
+  status TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE kkn_rundown ENABLE ROW LEVEL SECURITY;
+
+-- Izinkan akses publik untuk pembacaan & pengubahan
+CREATE POLICY "Public Full Access" 
+ON kkn_rundown 
+FOR ALL 
+USING (true) 
+WITH CHECK (true);</pre>
+                </div>
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-[11px] text-slate-500"><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> Kebijakan RLS publik diaktifkan</span>
+                    <button onclick="copySqlCode()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-copy"></i>
+                        <span id="copy-sql-btn-text">Salin Perintah SQL</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toast-msg" class="font-medium">Pesan notifikasi...</span>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://mtxtfkivxmpnsakktzpw.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10eHRma2l2xM3A2YWtrdHpB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MDc1MDIsImV4cCI6MjEwMDk4MzUwMn0.XQul1dsbkvI96UFs93tF9mRuXHCrF5PmipGVaAizorE";
+        
+        let supabaseClient = null;
+        let isCloudConnected = false;
+
+        // Initialize Supabase Client safely
+        if (typeof supabase !== 'undefined' && supabase.createClient) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // State Storage Keys & Variables
+        const STORAGE_KEY = 'kkn_rundown_weekly_v1';
+        let currentWeek = 1;
+        let selectedDayFilter = 'all';
+        let scheduleData = [];
+
+        // Sample Template 1 Week Data
+        const SAMPLE_PRESET_WEEK = [
+            // Senin (Hari 1)
+            { id: '101', week: 1, day: 'Senin', time: '06.00 - 07.30', title: 'Piket Posko & Sarapan Bersama', category: 'Rutinitas Posko', location: 'Posko Utama', pj: 'Divisi Konsumsi & Piket Tim A', status: 'Selesai', notes: 'Menyiapkan bahan makanan' },
+            { id: '102', week: 1, day: 'Senin', time: '08.00 - 10.30', title: 'Sowan & Silaturahmi Kepala Desa & Perangkat', category: 'Sosialisasi/Humas', location: 'Kantor Balai Desa', pj: 'Kordes & Sekretaris', status: 'Selesai', notes: 'Bawa berkas proposal & daftar nama mahasiswa' },
+            { id: '103', week: 1, day: 'Senin', time: '10.30 - 12.00', title: 'Observasi Lapangan RT 01 - RT 04', category: 'Proker Utama', location: 'Wilayah Dusun 1', pj: 'Divisi Humas & Lapangan', status: 'Selesai', notes: 'Pemetaan potensi lokal & masalah warga' },
+            { id: '104', week: 1, day: 'Senin', time: '13.30 - 16.00', title: 'Pendataan UMKM Desa (Kerajinan & Kuliner)', category: 'Proker Utama', location: 'Dusun Sukamaju', pj: 'Divisi Ekonomi & Ekraf', status: 'Belum', notes: 'Membawa kuisioner pendataan UMKM' },
+            { id: '105', week: 1, day: 'Senin', time: '19.30 - 21.00', title: 'Briefing Evaluasi Harian & Reorganisasi Piket', category: 'Evaluasi & Piket', location: 'Ruang Tengah Posko', pj: 'Seluruh Anggota', status: 'Belum', notes: 'Notulensi oleh Sekretaris' },
+
+            // Selasa (Hari 2)
+            { id: '201', week: 1, day: 'Selasa', time: '06.00 - 07.30', title: 'Olahraga Pagi & Senam Bersama Anak-Anak', category: 'Rutinitas Posko', location: 'Halaman Posko', pj: 'Divisi Olahraga & Kesra', status: 'Belum', notes: 'Siapkan speaker portable' },
+            { id: '202', week: 1, day: 'Selasa', time: '08.30 - 11.30', title: 'Pendampingan Posyandu Balita & Lansia', category: 'Proker Utama', location: 'Poskesdes / Posyandu Dusun 2', pj: 'Divisi Kesehatan', status: 'Belum', notes: 'Bantu pengukuran TB/BB & pencatatan' },
+            { id: '203', week: 1, day: 'Selasa', time: '14.00 - 16.30', title: 'Mengajar Bimbel Gratis (Matematika & B. Inggris)', category: 'Proker Pendukung', location: 'Posko KKN', pj: 'Divisi Pendidikan', status: 'Belum', notes: 'Target anak SD kelas 1-6' },
+            { id: '204', week: 1, day: 'Selasa', time: '19.30 - 21.00', title: 'Pengajian Rutin Ibu-Ibu & Perkenalan Tim', category: 'Sosialisasi/Humas', location: 'Musholla Al-Ikhlas', pj: 'Humas & Kordes', status: 'Belum', notes: 'Pakaian rapi muslim/muslimah' },
+
+            // Rabu (Hari 3)
+            { id: '301', week: 1, day: 'Rabu', time: '08.00 - 11.30', title: 'Kerja Bakti Pembersihan Drainase & Posko', category: 'Proker Pendukung', location: 'Lingkungan RT 02', pj: 'Divisi Lingkungan & Karang Taruna', status: 'Belum', notes: 'Koordinasi dengan Ketua RT' },
+            { id: '302', week: 1, day: 'Rabu', time: '13.00 - 15.30', title: 'Pelatihan Branding & Kemasan UMKM', category: 'Proker Utama', location: 'Balai Desa', pj: 'Divisi Ekonomi & Digital', status: 'Belum', notes: 'Siapkan sampel kemasan & laptop' },
+
+            // Kamis (Hari 4)
+            { id: '401', week: 1, day: 'Kamis', time: '08.00 - 11.00', title: 'Sosialisasi Perilaku Hidup Bersih & Sehat (PHBS)', category: 'Proker Utama', location: 'SD Negeri 1 Desa', pj: 'Divisi Kesehatan & Pendidikan', status: 'Belum', notes: 'Membawa sabun cuci tangan & peraga' },
+            { id: '402', week: 1, day: 'Kamis', time: '13.30 - 16.00', title: 'Survei Lokasi Pemasangan Plang Penunjuk Jalan', category: 'Proker Pendukung', location: 'Persimpangan Utama Desa', pj: 'Divisi Sarpras', status: 'Belum', notes: 'Ukur titik koordinat & kondisi tiang' },
+
+            // Jumat (Hari 5)
+            { id: '501', week: 1, day: 'Jumat', time: '08.00 - 11.00', title: 'Jumat Bersih Masjid & Persiapan Jumatan', category: 'Rutinitas Posko', location: 'Masjid Agung Desa', pj: 'Tim Piket Jumat', status: 'Belum', notes: 'Bawa alat kebersihan posko' },
+            { id: '502', week: 1, day: 'Jumat', time: '13.30 - 16.00', title: 'Kunjungan Koordinasi DPL (Dosen Pembimbing)', category: 'Sosialisasi/Humas', location: 'Posko Utama', pj: 'Kordes & Tim', status: 'Belum', notes: 'Siapkan draft laporan mingguan' },
+
+            // Sabtu (Hari 6)
+            { id: '601', week: 1, day: 'Sabtu', time: '08.00 - 12.00', title: 'Lomba Anak-Anak & Pemutaran Film Edukasi', category: 'Proker Pendukung', location: 'Lapangan Desa', pj: 'Divisi Acara & Pemuda', status: 'Belum', notes: 'Siapkan hadiah & proyektor' },
+            { id: '602', week: 1, day: 'Sabtu', time: '19.30 - 21.30', title: 'Rapat Koordinasi Mingguan dengan Pemuda/Karang Taruna', category: 'Evaluasi & Piket', location: 'Gedung Serbaguna', pj: 'Kordes & Humas', status: 'Belum', notes: 'Bahasa persiapan acara puncak' },
+
+            // Minggu (Hari 7)
+            { id: '701', week: 1, day: 'Minggu', time: '07.00 - 10.00', title: 'Jalan Sehat & Senam Masal Warga Desa', category: 'Proker Utama', location: 'Start Balai Desa', pj: 'Seluruh Panitia KKN', status: 'Belum', notes: 'Kupon doorprize & konsumsi' },
+            { id: '702', week: 1, day: 'Minggu', time: '19.30 - 21.00', title: 'Evaluasi Pekan 1 & Penyusunan Laporan Mingguan', category: 'Evaluasi & Piket', location: 'Posko KKN', pj: 'Sekretaris & Bendahara', status: 'Belum', notes: 'Rekapitulasi keuangan & absensi' }
+        ];
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await fetchSupabaseData();
+            setupRealtimeSubscription();
+        });
+
+        // Fetch Data from Supabase with LocalStorage fallback
+        async function fetchSupabaseData() {
+            updateStatusBadge('connecting', 'Supabase: Menghubungkan...');
+            if (!supabaseClient) {
+                loadLocalFallback("Supabase client gagal dimuat");
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('kkn_rundown')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (error) {
+                    console.warn("Supabase fetch notice:", error);
+                    loadLocalFallback("Supabase: Offline / Mode Lokal");
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    scheduleData = data;
+                    saveLocalData(); // Sync cache
+                    isCloudConnected = true;
+                    updateStatusBadge('connected', 'Supabase Cloud: Terhubung Live');
+                } else {
+                    // Database empty, upload defaults
+                    scheduleData = [...SAMPLE_PRESET_WEEK];
+                    isCloudConnected = true;
+                    updateStatusBadge('connected', 'Supabase Cloud: Terhubung (Kosong)');
+                    await uploadPresetToSupabase();
+                }
+                renderSchedule();
+            } catch (err) {
+                console.error("Supabase Exception:", err);
+                loadLocalFallback("Supabase: Terputus / Fallback Lokal");
+            }
+        }
+
+        // Setup Supabase Realtime Listener
+        function setupRealtimeSubscription() {
+            if (!supabaseClient) return;
+
+            supabaseClient
+                .channel('public:kkn_rundown')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'kkn_rundown' }, payload => {
+                    if (payload.eventType === 'INSERT') {
+                        const exists = scheduleData.some(i => i.id === payload.new.id);
+                        if (!exists) {
+                            scheduleData.push(payload.new);
+                            renderSchedule();
+                            showToast("Agenda baru disinkronkan dari anggota tim!");
+                        }
+                    } else if (payload.eventType === 'UPDATE') {
+                        const index = scheduleData.findIndex(i => i.id === payload.new.id);
+                        if (index !== -1) {
+                            scheduleData[index] = payload.new;
+                            renderSchedule();
+                        }
+                    } else if (payload.eventType === 'DELETE') {
+                        scheduleData = scheduleData.filter(i => i.id !== payload.old.id);
+                        renderSchedule();
+                    }
+                })
+                .subscribe();
+        }
+
+        function loadLocalFallback(statusLabel) {
+            loadLocalData();
+            isCloudConnected = false;
+            updateStatusBadge('offline', statusLabel);
+            renderSchedule();
+        }
+
+        function updateStatusBadge(type, text) {
+            const badge = document.getElementById('db-status-badge');
+            const statusText = document.getElementById('db-status-text');
+            if (!badge || !statusText) return;
+
+            statusText.innerText = text;
+            if (type === 'connected') {
+                badge.className = "bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1";
+            } else if (type === 'offline') {
+                badge.className = "bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1";
+            } else {
+                badge.className = "bg-slate-500/20 text-slate-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-500/30 flex items-center gap-1";
+            }
+        }
+
+        function loadLocalData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    scheduleData = JSON.parse(stored);
+                } catch(e) {
+                    scheduleData = [...SAMPLE_PRESET_WEEK];
+                }
+            } else {
+                scheduleData = [...SAMPLE_PRESET_WEEK];
+                saveLocalData();
+            }
+        }
+
+        function saveLocalData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleData));
+        }
+
+        // Bulk Upload Template to Supabase
+        async function uploadPresetToSupabase() {
+            if (!supabaseClient || !isCloudConnected) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('kkn_rundown')
+                    .upsert(scheduleData, { onConflict: 'id' });
+
+                if (error) {
+                    console.error("Error upserting preset:", error);
+                } else {
+                    showToast("Template 1 Minggu tersimpan ke Supabase Cloud!");
+                }
+            } catch (err) {
+                console.error("Error syncing preset:", err);
+            }
+        }
+
+        // Apply Preset Template
+        async function applyPresetTemplate() {
+            scheduleData = JSON.parse(JSON.stringify(SAMPLE_PRESET_WEEK));
+            saveLocalData();
+            renderSchedule();
+            
+            if (supabaseClient && isCloudConnected) {
+                await uploadPresetToSupabase();
+            } else {
+                showToast("Template Rundown 1 Minggu berhasil dimuat (Lokal)!");
+            }
+        }
+
+        async function saveActivity(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('edit-id').value;
+            const newItem = {
+                id: editId || Date.now().toString(),
+                week: currentWeek,
+                day: document.getElementById('input-day').value,
+                time: document.getElementById('input-time').value,
+                category: document.getElementById('input-category').value,
+                title: document.getElementById('input-title').value,
+                location: document.getElementById('input-location').value,
+                pj: document.getElementById('input-pj').value,
+                status: document.getElementById('input-status').value,
+                notes: document.getElementById('input-notes').value
+            };
+
+            if (editId) {
+                const index = scheduleData.findIndex(i => i.id === editId);
+                if (index !== -1) scheduleData[index] = newItem;
+            } else {
+                scheduleData.push(newItem);
+            }
+
+            saveLocalData();
+            closeAddModal();
+            renderSchedule();
+
+            if (supabaseClient && isCloudConnected) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('kkn_rundown')
+                        .upsert([newItem], { onConflict: 'id' });
+
+                    if (error) throw error;
+                    showToast(editId ? "Agenda diperbarui di Cloud Supabase!" : "Agenda tersimpan ke Cloud Supabase!");
+                } catch (err) {
+                    console.error("Supabase Save Error:", err);
+                    showToast("Tersimpan di Lokal (Gagal sync ke Cloud)");
+                }
+            } else {
+                showToast(editId ? "Agenda berhasil diperbarui!" : "Agenda baru ditambahkan!");
+            }
+        }
+
+        async function deleteActivity(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus agenda ini?")) {
+                scheduleData = scheduleData.filter(i => i.id !== id);
+                saveLocalData();
+                renderSchedule();
+
+                if (supabaseClient && isCloudConnected) {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('kkn_rundown')
+                            .delete()
+                            .eq('id', id);
+
+                        if (error) throw error;
+                        showToast("Agenda terhapus dari Cloud Supabase.");
+                    } catch (err) {
+                        console.error("Supabase Delete Error:", err);
+                        showToast("Terhapus dari Lokal.");
+                    }
+                } else {
+                    showToast("Agenda berhasil dihapus.");
+                }
+            }
+        }
+
+        function openSqlModal() {
+            document.getElementById('modal-sql').classList.remove('hidden');
+        }
+
+        function closeSqlModal() {
+            document.getElementById('modal-sql').classList.add('hidden');
+        }
+
+        function copySqlCode() {
+            const sqlText = document.getElementById('sql-code').innerText;
+            navigator.clipboard.writeText(sqlText).then(() => {
+                const btnText = document.getElementById('copy-sql-btn-text');
+                btnText.innerText = "Tersalin!";
+                showToast("Perintah SQL tersalin!");
+                setTimeout(() => {
+                    btnText.innerText = "Salin Perintah SQL";
+                }, 2000);
+            });
+        }
+
+        // Change Active Week
+        function changeWeek(val) {
+            currentWeek = parseInt(val);
+            document.getElementById('week-subtitle-text').innerText = `Pekan ${currentWeek} - Rincian alokasi waktu dan perorangan PJ`;
+            renderSchedule();
+        }
+
+        // Day Filtering
+        function filterByDay(day) {
+            selectedDayFilter = day;
+            
+            // Update tab styles
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                if (btn.getAttribute('data-day') === day) {
+                    btn.className = "day-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-indigo-600 text-white shadow-sm";
+                } else {
+                    btn.className = "day-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap";
+                }
+            });
+
+            // Update badge header
+            const badge = document.getElementById('active-day-badge');
+            if (day === 'all') {
+                badge.innerText = 'Semua Hari';
+            } else {
+                badge.innerText = `Hari: ${day}`;
+            }
+
+            renderSchedule();
+        }
+
+        // Render Schedule Table
+        function renderSchedule() {
+            const tbody = document.getElementById('schedule-tbody');
+            const emptyState = document.getElementById('empty-state');
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const categoryFilter = document.getElementById('filter-category').value;
+
+            // Filter logic
+            const filtered = scheduleData.filter(item => {
+                const matchDay = (selectedDayFilter === 'all') || (item.day === selectedDayFilter);
+                const matchWeek = (item.week || 1) == currentWeek;
+                const matchSearch = item.title.toLowerCase().includes(searchQuery) || 
+                                    (item.pj && item.pj.toLowerCase().includes(searchQuery)) ||
+                                    (item.location && item.location.toLowerCase().includes(searchQuery));
+                const matchStatus = (statusFilter === 'all') || (item.status === statusFilter);
+                const matchCategory = (categoryFilter === 'all') || (item.category === categoryFilter);
+
+                return matchDay && matchWeek && matchSearch && matchStatus && matchCategory;
+            });
+
+            // Calculate Stats
+            calculateStats(filtered);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            // Sort by day order then time
+            const dayOrder = { 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6, 'Minggu': 7 };
+            filtered.sort((a, b) => (dayOrder[a.day] || 99) - (dayOrder[b.day] || 99));
+
+            let html = '';
+            filtered.forEach(item => {
+                html += `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">
+                        <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                            <i class="fa-regular fa-calendar text-[10px]"></i>
+                            <span>${item.day}</span>
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 font-medium text-slate-700 whitespace-nowrap">
+                        <i class="fa-regular fa-clock text-slate-400 mr-1 text-[11px]"></i>${item.time}
+                    </td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                        ${getCategoryBadge(item.category)}
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-slate-800 text-xs">${item.title}</div>
+                        ${item.notes ? `<div class="text-[11px] text-slate-500 mt-0.5"><i class="fa-solid fa-info-circle text-slate-400 mr-1"></i>${item.notes}</div>` : ''}
+                    </td>
+                    <td class="py-3 px-4 text-slate-600 whitespace-nowrap">
+                        <i class="fa-solid fa-location-dot text-rose-400 mr-1 text-[11px]"></i>${item.location || '-'}
+                    </td>
+                    <td class="py-3 px-4 text-slate-700 font-medium whitespace-nowrap">
+                        <i class="fa-solid fa-user-gear text-indigo-400 mr-1 text-[11px]"></i>${item.pj || '-'}
+                    </td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                        ${getStatusBadge(item.status)}
+                    </td>
+                    <td class="py-3 px-4 text-center whitespace-nowrap no-print">
+                        <button onclick="editActivity('${item.id}')" title="Edit Agenda" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteActivity('${item.id}')" title="Hapus Agenda" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition-colors ml-0.5">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Calculate Stats Metrics
+        function calculateStats(items) {
+            const total = items.length;
+            const completed = items.filter(i => i.status === 'Selesai').length;
+            const progress = items.filter(i => i.status === 'Sedang Berlangsung').length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-completed').innerText = completed;
+            document.getElementById('stat-progress').innerText = progress;
+            document.getElementById('stat-percentage').innerText = `${percent}%`;
+        }
+
+        // Badge Helpers
+        function getCategoryBadge(cat) {
+            switch(cat) {
+                case 'Proker Utama':
+                    return `<span class="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-200">Proker Utama</span>`;
+                case 'Proker Pendukung':
+                    return `<span class="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-sky-200">Proker Pendukung</span>`;
+                case 'Sosialisasi/Humas':
+                    return `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200">Sosialisasi</span>`;
+                case 'Evaluasi & Piket':
+                    return `<span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200">Evaluasi</span>`;
+                default:
+                    return `<span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200">Rutinitas</span>`;
+            }
+        }
+
+        function getStatusBadge(st) {
+            switch(st) {
+                case 'Selesai':
+                    return `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-circle-check"></i> Selesai</span>`;
+                case 'Sedang Berlangsung':
+                    return `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-spinner animate-spin"></i> Sedang Jalan</span>`;
+                default:
+                    return `<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-600 text-[10px] font-medium px-2 py-0.5 rounded"><i class="fa-regular fa-circle"></i> Belum Mulai</span>`;
+            }
+        }
+
+        // Add / Edit Agenda Modal Handlers
+        function openAddModal() {
+            document.getElementById('form-activity').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-400"></i> <span>Tambah Agenda Harian</span>`;
+            if (selectedDayFilter !== 'all') {
+                document.getElementById('input-day').value = selectedDayFilter;
+            }
+            document.getElementById('modal-add').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('modal-add').classList.add('hidden');
+        }
+
+        function editActivity(id) {
+            const item = scheduleData.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('input-day').value = item.day;
+            document.getElementById('input-time').value = item.time;
+            document.getElementById('input-category').value = item.category || 'Proker Utama';
+            document.getElementById('input-title').value = item.title;
+            document.getElementById('input-location').value = item.location || '';
+            document.getElementById('input-pj').value = item.pj || '';
+            document.getElementById('input-status').value = item.status || 'Belum';
+            document.getElementById('input-notes').value = item.notes || '';
+
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-400"></i> <span>Edit Agenda Harian</span>`;
+            document.getElementById('modal-add').classList.remove('hidden');
+        }
+
+        // WhatsApp Export Modal Logic
+        function openWAModal() {
+            const daySelect = document.getElementById('wa-day-select');
+            if (selectedDayFilter !== 'all') {
+                daySelect.value = selectedDayFilter;
+            } else {
+                daySelect.value = 'Senin';
+            }
+            generateWABroadcast();
+            document.getElementById('modal-wa').classList.remove('hidden');
+        }
+
+        function closeWAModalhub() {
+            document.getElementById('modal-wa').classList.add('hidden');
+        }
+
+        function generateWABroadcast() {
+            const day = document.getElementById('wa-day-select').value;
+            const items = scheduleData.filter(i => i.day === day && (i.week || 1) == currentWeek);
+
+            let msg = `*📢 JADWAL & AGENDA HARIAN KKN*\n`;
+            msg += `📌 *Hari:* ${day} (Pekan ${currentWeek})\n`;
+            msg += `------------------------------------\n\n`;
+
+            if (items.length === 0) {
+                msg += `_Belum ada agenda terdaftar untuk hari ini._\n\n`;
+            } else {
+                items.forEach((item, index) => {
+                    msg += `*${index + 1}. ${item.title}*\n`;
+                    msg += `⏰ Waktu: ${item.time}\n`;
+                    msg += `📍 Lokasi: ${item.location || '-'}\n`;
+                    msg += `👤 PJ: ${item.pj || '-'}\n`;
+                    msg += `📌 Catatan: ${item.notes || '-'}\n\n`;
+                });
+            }
+
+            msg += `------------------------------------\n`;
+            msg += `_Mohon seluruh anggota tim posko hadir tepat waktu. Terima kasih!_ 🙏✨`;
+
+            document.getElementById('wa-text-area').value = msg;
+        }
+
+        function copyToClipboardWA() {
+            const textArea = document.getElementById('wa-text-area');
+            textArea.select();
+            document.execCommand('copy');
+
+            const btnText = document.getElementById('copy-btn-text');
+            btnText.innerText = "Tersalin!";
+            showToast("Teks format WA tersalin ke clipboard!");
+            setTimeout(() => {
+                btnText.innerText = "Salin Teks";
+            }, 2000);
+        }
+
+        // Export to CSV
+        function exportCSV() {
+            if (scheduleData.length === 0) {
+                showToast("Tidak ada data untuk diexport!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Pekan,Hari,Waktu,Kategori,Nama Agenda,Lokasi,PJ,Status,Catatan\n";
+
+            scheduleData.forEach(i => {
+                const row = [
+                    i.week || 1,
+                    `"${i.day}"`,
+                    `"${i.time}"`,
+                    `"${i.category}"`,
+                    `"${i.title.replace(/"/g, '""')}"`,
+                    `"${(i.location || '').replace(/"/g, '""')}"`,
+                    `"${(i.pj || '').replace(/"/g, '""')}"`,
+                    `"${i.status}"`,
+                    `"${(i.notes || '').replace(/"/g, '""')}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Rundown_KKN_Minggu_${currentWeek}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("File CSV berhasil diunduh!");
+        }
+
+        // Toast Notification Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
