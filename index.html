@@ -739,46 +739,6 @@
             const year = parseInt(parts[2]) || 0;
             return new Date(year, month, day).getTime();
         }
-            let colorClasses = "bg-slate-100 text-slate-700 border-slate-200";
-            let iconClass = "fa-tag";
-
-            if (proker.includes("Sampah")) {
-                colorClasses = "bg-amber-50 text-amber-800 border-amber-200";
-                iconClass = "fa-recycle";
-            } else if (proker.includes("TPQ")) {
-                colorClasses = "bg-emerald-50 text-emerald-800 border-emerald-200";
-                iconClass = "fa-book-quran";
-            } else if (proker.includes("Agustusan") || proker.includes("HUT")) {
-                colorClasses = "bg-rose-50 text-rose-800 border-rose-200";
-                iconClass = "fa-flag";
-            } else if (proker.includes("Stunting")) {
-                colorClasses = "bg-sky-50 text-sky-800 border-sky-200";
-                iconClass = "fa-hand-holding-medical";
-            } else if (proker.includes("Penerjunan") || proker.includes("Observasi")) {
-                colorClasses = "bg-indigo-50 text-indigo-800 border-indigo-200";
-                iconClass = "fa-compass";
-            } else if (proker.includes("UMKM") || proker.includes("Digitalisasi")) {
-                colorClasses = "bg-purple-50 text-purple-800 border-purple-200";
-                iconClass = "fa-store";
-            } else if (proker.includes("Sekolah")) {
-                colorClasses = "bg-amber-50 text-amber-900 border-amber-300";
-                iconClass = "fa-graduation-cap";
-            } else if (proker.includes("Lingkungan")) {
-                colorClasses = "bg-teal-50 text-teal-800 border-teal-200";
-                iconClass = "fa-tree";
-            } else if (proker.includes("Laporan")) {
-                colorClasses = "bg-blue-50 text-blue-800 border-blue-200";
-                iconClass = "fa-file-lines";
-            } else if (proker.includes("Penutupan") || proker.includes("Penarikan")) {
-                colorClasses = "bg-fuchsia-50 text-fuchsia-800 border-fuchsia-200";
-                iconClass = "fa-handshake";
-            }
-
-            return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${colorClasses}">
-                <i class="fa-solid ${iconClass} text-[10px]"></i>
-                ${proker}
-            </span>`;
-        }
 
         // Render Table Data globally
         window.renderTable = function() {
