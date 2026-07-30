@@ -10,8 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- html2pdf.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- jsPDF + AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -1036,45 +1037,80 @@
         function exportPDFAll() {
             const dataList = window.scheduleData || [];
             const weeks = [1, 2, 3, 4, 5, 6];
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-            let title = "MATRIKS KEGIATAN KKN - SEMUA MINGGU";
-            let sections = '';
+            const pageW = doc.internal.pageSize.getWidth();
+
             let totalCount = 0;
+            let firstPage = true;
 
             weeks.forEach((w, idx) => {
                 const wData = dataList.filter(i => i.week === w);
+                if (wData.length === 0) return;
                 totalCount += wData.length;
-                const isLast = idx === weeks.length - 1;
 
-                sections += `
-                <div style="${isLast ? '' : 'page-break-after: always;'} margin-bottom: 20px;">
-                    <h2>MINGGU KE-${w}</h2>
-                    <p class="sub">Kegiatan: ${wData.length} item</p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Hari/Tanggal</th>
-                                <th>Waktu</th>
-                                <th>Prioritas</th>
-                                <th>Proker</th>
-                                <th>Kegiatan</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${wData.map(item => `
-                                <tr>
-                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.date}</td>
-                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.time}</td>
-                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.priority || 'Sedang'}</td>
-                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.proker}</td>
-                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.activity}</td>
-                                    <td style="padding:4px 6px;border:1px solid #cbd5e1;">${item.status || 'Belum'}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>`;
+                if (!firstPage) doc.addPage();
+                firstPage = false;
+
+                // Title
+                doc.setFontSize(16);
+                doc.setTextColor(49, 46, 129);
+                doc.text('MATRIKS KEGIATAN KKN - MINGGU KE-' + w, pageW / 2, 20, { align: 'center' });
+
+                // Divider
+                doc.setDrawColor(99, 102, 241);
+                doc.setLineWidth(1.5);
+                doc.line(14, 24, pageW - 14, 24);
+
+                // Subtitle
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text('Kegiatan: ' + wData.length + ' item', 14, 32);
+
+                // Sort data by date
+                const sorted = [...wData].sort((a, b) => parseDateString(a.date) - parseDateString(b.date));
+
+                const rows = sorted.map(item => [
+                    item.date,
+                    item.time,
+                    item.priority || 'Sedang',
+                    item.proker,
+                    item.activity,
+                    item.status || 'Belum'
+                ]);
+
+                doc.autoTable({
+                    startY: 37,
+                    head: [['Hari/Tanggal', 'Waktu', 'Prioritas', 'Proker', 'Kegiatan', 'Status']],
+                    body: rows,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [79, 70, 229],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: 9,
+                        halign: 'left'
+                    },
+                    bodyStyles: {
+                        fontSize: 8,
+                        textColor: [30, 41, 59]
+                    },
+                    alternateRowStyles: {
+                        fillColor: [248, 250, 252]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 40 },
+                        1: { cellWidth: 22 },
+                        2: { cellWidth: 22 },
+                        3: { cellWidth: 40 },
+                        4: { cellWidth: 'auto' },
+                        5: { cellWidth: 22 }
+                    },
+                    margin: { left: 14, right: 14 },
+                    tableLineColor: [203, 213, 225],
+                    tableLineWidth: 0.5
+                });
             });
 
             if (totalCount === 0) {
@@ -1082,39 +1118,28 @@
                 return;
             }
 
-            const container = document.createElement('div');
-            container.style.cssText = 'position:fixed;top:0;left:0;width:100%;z-index:-1;pointer-events:none;opacity:0.01;';
-            container.innerHTML = `
-                <div id="pdf-content" style="font-family: sans-serif; padding: 24px; font-size: 11px; background: white; color: #1e293b;">
-                    <h1 style="font-size: 20px; margin-bottom: 2px; color: #312e81;">${title}</h1>
-                    <div style="border-bottom: 3px solid #6366f1; margin-bottom: 8px;"></div>
-                    <p style="color: #64748b; font-size: 11px; margin-bottom: 18px;">Tanggal cetak: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | Total seluruh kegiatan: ${totalCount}</p>
-                    ${sections}
-                    <div style="margin-top: 24px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; text-align: center;">Matriks Kegiatan KKN Desa Sokaraja - 0xfndLabs</div>
-                </div>
-            `;
-            document.body.appendChild(container);
+            // Footer on last page
+            const lastY = doc.lastAutoTable.finalY || 50;
+            doc.setFontSize(7);
+            doc.setTextColor(148, 163, 184);
+            doc.text('Matriks Kegiatan KKN Desa Sokaraja - 0xfndLabs', pageW / 2, lastY + 20, { align: 'center' });
 
-            showToast('Membuat PDF...', 'info');
+            // Global footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(7);
+                doc.setTextColor(148, 163, 184);
+                doc.text(
+                    'Matriks Kegiatan KKN - 0xfndLabs | Halaman ' + i + ' dari ' + pageCount,
+                    pageW / 2,
+                    doc.internal.pageSize.getHeight() - 8,
+                    { align: 'center' }
+                );
+            }
 
-            requestAnimationFrame(() => {
-                const opt = {
-                    margin: [0.5, 0.5, 0.5, 0.5],
-                    filename: 'Matriks_Kegiatan_KKN_Semua_Minggu.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, letterRendering: true, useCORS: true },
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
-                    pagebreak: { mode: ['css'] }
-                };
-
-                html2pdf().from(container).set(opt).save().then(() => {
-                    document.body.removeChild(container);
-                    showToast('PDF berhasil diunduh!');
-                }).catch(err => {
-                    document.body.removeChild(container);
-                    showToast('Gagal membuat PDF: ' + err.message, 'danger');
-                });
-            });
+            doc.save('Matriks_Kegiatan_KKN_Semua_Minggu.pdf');
+            showToast('PDF berhasil diunduh!');
         }
 
 // Toast Notification System
