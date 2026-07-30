@@ -373,7 +373,30 @@
 
     <!-- WhatsApp Export Modal -->
     <div id="modal-wa" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden no-print">
-        <!-- WhatsApp Broadcast Modal -->
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in duration-200">
+            <div class="bg-emerald-700 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <h3 class="font-bold text-base">Format WA Hari Ini</h3>
+                </div>
+                <button onclick="closeWAModal()" class="text-white/70 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-xs text-slate-500">Salin pesan di bawah lalu kirim ke grup WhatsApp KKN.</p>
+                <textarea id="wa-text" class="w-full border border-slate-300 rounded-xl p-4 text-sm font-mono bg-slate-50 text-slate-800 resize-none" rows="14" readonly></textarea>
+                <div class="flex gap-2">
+                    <button onclick="copyWAText()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Salin Pesan</span>
+                    </button>
+                    <button onclick="closeWAModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 px-4 rounded-xl text-sm transition-all">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
         <!-- Supabase SQL Setup Modal -->
@@ -823,13 +846,45 @@ WITH CHECK (true);</pre>
             document.getElementById('modal-add').classList.remove('hidden');
         }
 
-        // WhatsApp Broadcast (Modal placeholder)
+        // WhatsApp Format Hari Ini
         function openWAModal() {
+            const today = new Date();
+            const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const todayName = dayNames[today.getDay()];
+            const todayStr = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            const todayItems = scheduleData.filter(i => i.day === todayName);
+
+            let msg = `📅 *JADWAL HARI INI - ${todayName}, ${todayStr.toUpperCase()}*\n\n`;
+
+            if (todayItems.length === 0) {
+                msg += `Tidak ada agenda untuk hari ini. 👋`;
+            } else {
+                todayItems.forEach((item, index) => {
+                    msg += `${index + 1}. *${item.title}*\n`;
+                    msg += `   ⏰ ${item.time}\n`;
+                    msg += `   📍 ${item.location || '-'}\n`;
+                    msg += `   👤 PJ: ${item.pj || '-'}\n`;
+                    msg += `   📌 ${item.notes || '-'}\n\n`;
+                });
+            }
+
+            document.getElementById('wa-text').value = msg;
             document.getElementById('modal-wa').classList.remove('hidden');
         }
 
         function closeWAModal() {
             document.getElementById('modal-wa').classList.add('hidden');
+        }
+
+        function copyWAText() {
+            const el = document.getElementById('wa-text');
+            el.select();
+            navigator.clipboard.writeText(el.value).then(() => {
+                showToast('Pesan berhasil disalin!');
+            }).catch(() => {
+                showToast('Gagal menyalin. Salin manual.', 'danger');
+            });
         }
 
         // Export to CSV (all weeks in single file, split per week)
