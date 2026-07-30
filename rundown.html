@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
@@ -448,7 +447,6 @@ WITH CHECK (true);</pre>
         }
 
         // State Storage Keys & Variables
-        const STORAGE_KEY = 'kkn_rundown_weekly_v1';
         let currentWeek = 1;
         let selectedDayFilter = 'all';
         let scheduleData = [];
@@ -458,11 +456,12 @@ WITH CHECK (true);</pre>
             setupRealtimeSubscription();
         });
 
-        // Fetch Data from Supabase with LocalStorage fallback
+        // Fetch Data from Supabase (No local fallback - Cloud only)
         async function fetchSupabaseData() {
             updateStatusBadge('connecting', 'Supabase: Menghubungkan...');
             if (!supabaseClient) {
-                loadLocalFallback("Supabase client gagal dimuat");
+                updateStatusBadge('offline', 'Supabase: Tidak Tersedia');
+                renderSchedule();
                 return;
             }
 
@@ -474,13 +473,13 @@ WITH CHECK (true);</pre>
 
                 if (error) {
                     console.warn("Supabase fetch notice:", error);
-                    loadLocalFallback("Supabase: Online / Mode Lokal");
+                    updateStatusBadge('offline', 'Supabase: Error');
+                    renderSchedule();
                     return;
                 }
 
                 if (data && data.length > 0) {
                     scheduleData = data;
-                    saveLocalData();
                     isCloudConnected = true;
                     updateStatusBadge('connected', 'Supabase Cloud: Terhubung Live');
                 } else {
@@ -491,7 +490,8 @@ WITH CHECK (true);</pre>
                 renderSchedule();
             } catch (err) {
                 console.error("Supabase Exception:", err);
-                loadLocalFallback("Supabase: Terputus / Fallback Lokal");
+                updateStatusBadge('offline', 'Supabase: Terputus');
+                renderSchedule();
             }
         }
 
@@ -523,13 +523,6 @@ WITH CHECK (true);</pre>
                 .subscribe();
         }
 
-        function loadLocalFallback(statusLabel) {
-            loadLocalData();
-            isCloudConnected = false;
-            updateStatusBadge('offline', statusLabel);
-            renderSchedule();
-        }
-
         function updateStatusBadge(type, text) {
             const badge = document.getElementById('db-status-badge');
             const statusText = document.getElementById('db-status-text');
@@ -538,29 +531,10 @@ WITH CHECK (true);</pre>
             statusText.innerText = text;
             if (type === 'connected') {
                 badge.className = "bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1";
-            } else if (type === 'offline') {
-                badge.className = "bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1";
+
             } else {
                 badge.className = "bg-slate-500/20 text-slate-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-500/30 flex items-center gap-1";
             }
-        }
-
-        function loadLocalData() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    scheduleData = JSON.parse(stored);
-                } catch(e) {
-                    scheduleData = [];
-                }
-            } else {
-                scheduleData = [];
-                saveLocalData();
-            }
-        }
-
-        function saveLocalData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleData));
         }
 
         async function saveActivity(e) {
@@ -587,7 +561,6 @@ WITH CHECK (true);</pre>
                 scheduleData.push(newItem);
             }
 
-            saveLocalData();
             closeAddModal();
             renderSchedule();
 
@@ -611,7 +584,6 @@ WITH CHECK (true);</pre>
         async function deleteActivity(id) {
             if (confirm("Apakah Anda yakin ingin menghapus agenda ini?")) {
                 scheduleData = scheduleData.filter(i => i.id !== id);
-                saveLocalData();
                 renderSchedule();
 
                 if (supabaseClient && isCloudConnected) {
