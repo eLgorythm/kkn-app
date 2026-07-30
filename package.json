@@ -1,0 +1,15 @@
+{
+  "name": "kkn-wa-bot",
+  "version": "1.0.0",
+  "description": "WhatsApp Bot untuk Rundown KKN Desa Sokaraja",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.5",
+    "firebase": "^10.8.0",
+    "pino": "^8.19.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
