@@ -106,9 +106,9 @@
                         <i class="fa-solid fa-file-excel"></i>
                         <span>Export CSV</span>
                     </button>
-<button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white font-medium px-3.5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2 border border-indigo-400/30">
-                         <i class="fa-solid fa-print"></i>
-                         <span>Cetak</span>
+<button onclick="exportPDFAll()" title="Export PDF Semua Minggu" class="bg-red-600 hover:bg-red-700 text-white font-medium px-3.5 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
+                         <i class="fa-solid fa-file-pdf"></i>
+                         <span>Export PDF</span>
                      </button>
                      <a href="rundown.html" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-3.5 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
                          <i class="fa-solid fa-table"></i>
@@ -1054,71 +1054,13 @@
             document.getElementById('item-modal').classList.remove('hidden');
         }
 
-        // Export CSV (all weeks in single file, split by week)
+        // Export to CSV Function
         function exportToCSV() {
-            exportCSVAllSplit();
-        }
-
-        function exportCSVAllSplit() {
             const dataList = window.scheduleData || [];
-            let csvContent = "";
-            csvContent += "Hari/Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
-
-            const weeks = [1, 2, 3, 4, 5, 6];
-            let totalExported = 0;
-            let firstWeek = true;
-
-            weeks.forEach((w) => {
-                const wData = dataList.filter(i => i.week === w);
-                if (wData.length === 0) return;
-
-                // Add blank row separator between weeks (except before first)
-                if (!firstWeek) {
-                    csvContent += "\n";
-                }
-                firstWeek = false;
-
-                wData.forEach(item => {
-                    const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
-                    const cleanTime = `"${item.time.replace(/"/g, '""')}"`;
-                    const cleanPriority = `"${(item.priority || 'Sedang').replace(/"/g, '""')}"`;
-                    const cleanProker = `"${item.proker.replace(/"/g, '""')}"`;
-                    const cleanActivity = `"${item.activity.replace(/"/g, '""')}"`;
-                    const cleanStatus = `"${(item.status || 'Belum').replace(/"/g, '""')}"`;
-                    csvContent += `${cleanDate},${cleanTime},${cleanPriority},${cleanProker},${cleanActivity},${cleanStatus}\n`;
-                });
-
-                totalExported += wData.length;
-            });
-
-            if (totalExported === 0) {
-                showToast('Tidak ada data untuk di-export.', 'info');
-                return;
-            }
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Matriks_KKN_Semua_Minggu.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showToast(`CSV semua minggu berhasil diunduh (${totalExported} kegiatan)`);
-        }
-
-        function exportCSVWeek(week) {
-            const dataList = window.scheduleData || [];
-            let filtered = dataList;
-
-            if (week !== 'all') {
-                filtered = dataList.filter(i => i.week === parseInt(week));
-            }
-
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Hari/Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
 
-            filtered.forEach(item => {
+            dataList.forEach(item => {
                 const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
                 const cleanTime = `"${item.time.replace(/"/g, '""')}"`;
                 const cleanPriority = `"${(item.priority || 'Sedang').replace(/"/g, '""')}"`;
@@ -1128,29 +1070,19 @@
                 csvContent += `${cleanDate},${cleanTime},${cleanPriority},${cleanProker},${cleanActivity},${cleanStatus}\n`;
             });
 
-            const weekLabel = week === 'all' ? 'Semua' : `Minggu_${week}`;
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Matriks_KKN_${weekLabel}.csv`);
+            link.setAttribute("download", "Matriks_KKN.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            showToast(`CSV ${weekLabel} berhasil diunduh`);
+            showToast('File CSV berhasil diunduh');
         }
 
-        function exportSelectedCSV() {
-            const week = document.getElementById('export-week-select').value;
-            exportCSVWeek(week === 'all' ? 'all' : parseInt(week));
-        }
-
-        function exportSelectedPDF() {
-            const week = document.getElementById('export-week-select').value;
-            exportPDFWeek(week === 'all' ? 'all' : parseInt(week));
-        }
-
-        function exportPDFWeek(week) {
+        // Export PDF Function (all data in one file, per-week sections)
+        function exportPDFAll() {
             const dataList = window.scheduleData || [];
             const weeks = [1, 2, 3, 4, 5, 6];
 
@@ -1212,14 +1144,12 @@
                     <title>${title}</title>
                     <style>
                         * { box-sizing: border-box; margin: 0; padding: 0; }
-                        body { font-family: 'Segoe UI', sans-serif; padding: 24px; font-size: 11px; background: white; color: #1e293b; }
+                        body { font-family: sans-serif; padding: 24px; font-size: 11px; background: white; color: #1e293b; }
                         h1 { font-size: 20px; margin-bottom: 2px; color: #312e81; }
                         .header-line { border-bottom: 3px solid #6366f1; margin-bottom: 8px; }
                         .subtitle { color: #64748b; font-size: 11px; margin-bottom: 18px; }
                         .week-section { margin-bottom: 28px; page-break-after: always; }
                         .week-section:last-child { page-break-after: auto; }
-                        .week-title { font-size: 15px; font-weight: 700; color: #4f46e5; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 2px solid #c7d2fe; }
-                        .week-count { font-size: 10px; color: #94a3b8; margin-bottom: 8px; }
                         table { width: 100%; border-collapse: collapse; }
                         th { background: #4f46e5; color: white; padding: 6px 8px; border: 1px solid #4338ca; text-align: left; font-size: 10px; font-weight: 600; }
                         td { padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 10px; }
@@ -1245,8 +1175,9 @@
             `);
             printWindow.document.close();
 
-            showToast(`Membuka PDF per minggu (1 file)...`);
+            showToast('Membuka PDF per minggu (1 file)...');
         }
+
 // Toast Notification System
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
