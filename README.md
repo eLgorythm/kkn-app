@@ -138,4 +138,4 @@ kkn/
 
 ## 📄 Lisensi & Kredit
 
-Dikembangkan oleh **0xfndLabs** untuk keperluan KKN Desa Sokaraja. Seluruh pesan bot ditulis dengan gaya *divisi acara* yang santai dan penuh semangat. 🔥
+Developed with ❤️ by **0xfndLabs** using Firebase, Supabase, Tailwind CSS, and Baileys — for KKN53 UNSIQ.
