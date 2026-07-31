@@ -958,16 +958,17 @@ WITH CHECK (true);</pre>
                 firstWeek = false;
 
                 wData.forEach(i => {
+                    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
                     const row = [
                         i.week || 1,
-                        `"${i.day}"`,
-                        `"${i.time}"`,
-                        `"${i.category}"`,
-                        `"${i.title.replace(/"/g, '""')}"`,
-                        `"${(i.location || '').replace(/"/g, '""')}"`,
-                        `"${(i.pj || '').replace(/"/g, '""')}"`,
-                        `"${i.status}"`,
-                        `"${(i.notes || '').replace(/"/g, '""')}"`
+                        esc(i.day),
+                        esc(i.time),
+                        esc(i.category),
+                        esc(i.title),
+                        esc(i.location),
+                        esc(i.pj),
+                        esc(i.status),
+                        esc(i.notes)
                     ];
                     csvContent += row.join(",") + "\n";
                 });
@@ -975,7 +976,7 @@ WITH CHECK (true);</pre>
                 totalExported += wData.length;
             });
 
-            const encodedUri = encodeURI(csvContent);
+            const encodedUri = encodeURI("\uFEFF" + csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", "Rundown_KKN_Semua_Minggu.csv");
