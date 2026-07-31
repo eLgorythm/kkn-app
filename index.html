@@ -796,8 +796,13 @@
                  return matchesWeek && matchesProker && matchesStatus && matchesPriority && matchesSearch;
              });
 
-             // Sort by date
-             filteredData.sort((a, b) => parseDateString(a.date) - parseDateString(b.date));
+             // Sort by week, then by date
+             filteredData.sort((a, b) => {
+                 const wa = parseInt(a.week) || 0;
+                 const wb = parseInt(b.week) || 0;
+                 if (wa !== wb) return wa - wb;
+                 return parseDateString(a.date) - parseDateString(b.date);
+             });
 
              // Update Statistics
             updateStats(dataList);
@@ -1012,7 +1017,14 @@
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Hari/Tanggal,Waktu,Prioritas,Proker,Kegiatan,Status\n";
 
-            dataList.forEach(item => {
+            const sortedData = [...dataList].sort((a, b) => {
+                const wa = parseInt(a.week) || 0;
+                const wb = parseInt(b.week) || 0;
+                if (wa !== wb) return wa - wb;
+                return parseDateString(a.date) - parseDateString(b.date);
+            });
+
+            sortedData.forEach(item => {
                 const cleanDate = `"${item.date.replace(/"/g, '""')}"`;
                 const cleanTime = `"${item.time.replace(/"/g, '""')}"`;
                 const cleanPriority = `"${(item.priority || 'Sedang').replace(/"/g, '""')}"`;
