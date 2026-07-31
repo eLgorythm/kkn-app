@@ -1,6 +1,7 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, getDocs } = require('firebase/firestore');
+const { createClient } = require('@supabase/supabase-js');
 const qrcode = require('qrcode-terminal');
 const pino = require('pino');
 const fs = require('fs');
@@ -18,6 +19,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Konfigurasi Supabase (sesuai rundown.html)
+const SUPABASE_URL = "https://mtxtfkivxmpnsakktzpw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10eHRma2l2eG1wbnNha2t0enB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MDc1MDIsImV4cCI6MjEwMDk4MzUwMn0.XQul1dsbkvI96UFs93tF9mRuXHCrF5PmipGVaAizorE";
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const BOT_FOOTER = `\n_— 0xfndLabs KKN System_ 🤖`;
+
 async function fetchRundownData() {
     try {
         const querySnapshot = await getDocs(collection(db, "rundown_kkn"));
@@ -29,6 +37,18 @@ async function fetchRundownData() {
         return data;
     } catch (e) {
         console.error("Gagal ambil data Firestore:", e);
+        return [];
+    }
+}
+
+// Ambil data jadwal harian dari Supabase (rundown.html)
+async function fetchRundownSupabase() {
+    try {
+        const { data, error } = await supabaseClient.from('kkn_rundown').select('*');
+        if (error) throw error;
+        return data || [];
+    } catch (e) {
+        console.error("Gagal ambil data Supabase:", e);
         return [];
     }
 }
@@ -118,16 +138,23 @@ const menuMsg = `🤖 *SELAMAT DATANG DI BOT KKN DESA SOKARAJA!* 🎉\n\n` +
                                  `📅 *!hariini* - Ada apa aja hari ini?\n` +
                                  `📅 *!besok* - Recap dulu buat besok\n` +
                                  `📢 *!broadcast* - Info lengkap semua agenda\n` +
-                                 `📩 *!kirim [nomor] [pesan]* - Kirim pesan via WA\n` +
-                                 `📊 *!progress* - Cek seberapa jauh kita jalan\n` +
-                                 `ℹ️ *!menu* - Bantuan ini\n\n` +
-                                 `Jangan bosen, jangan lupa, see you di lapangan! 🔥`;
+                                  `📩 *!kirim [nomor] [pesan]* - Kirim pesan via WA\n` +
+                                  `📊 *!progress* - Cek seberapa jauh kita jalan\n` +
+                                  `⚡ *!ping* - Tes koneksi bot\n` +
+                                  `ℹ️ *!menu* - Bantuan ini\n\n` +
+                                  `Jangan bosen, jangan lupa, see you di lapangan! 🔥` + BOT_FOOTER;
                 await sock.sendMessage(remoteJid, { text: menuMsg }, { quoted: msg });
             } 
+            else if (text === '!ping') {
+                const start = Date.now();
+                await sock.sendMessage(remoteJid, { text: '🏓 *Pong!*' }, { quoted: msg });
+                const latency = Date.now() - start;
+                await sock.sendMessage(remoteJid, { text: `⚡ *Latency: ${latency} ms*\n🤖 Bot KKN aktif & responsif!` + BOT_FOOTER });
+            }
             else if (text === '!progress') {
                 const data = await fetchRundownData();
                 if (data.length === 0) {
-                    await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan di database." }, { quoted: msg });
+                    await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan di database." + BOT_FOOTER }, { quoted: msg });
                     return;
                 }
 
@@ -144,13 +171,13 @@ const menuMsg = `🤖 *SELAMAT DATANG DI BOT KKN DESA SOKARAJA!* 🎉\n\n` +
                                 `⏳ Menunggu giliran: *${belum}*\n` +
                                 `📦 Total: *${total}*\n\n` +
                                 `📈 *Progress kita: ${percentage}%*\n\n` +
-                                `Alhamdulillah, kita sudah melangkah sejauh ini! Tinggal *${belum}* lagi yang menanti. Selama kita kompak, semua pasti kebawa. Semangat terus, kawan-kawan! 🌟`;
+                                `Alhamdulillah, kita sudah melangkah sejauh ini! Tinggal *${belum}* lagi yang menanti. Selama kita kompak, semua pasti kebawa. Semangat terus, kawan-kawan! 🌟` + BOT_FOOTER;
                 await sock.sendMessage(remoteJid, { text: progMsg }, { quoted: msg });
             }
 else if (text.startsWith('!jadwal')) {
                  const data = await fetchRundownData();
                  if (data.length === 0) {
-                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan." }, { quoted: msg });
+                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan." + BOT_FOOTER }, { quoted: msg });
                      return;
                  }
 
@@ -158,21 +185,23 @@ else if (text.startsWith('!jadwal')) {
                  const weekParam = parseInt(parts[1]);
 
                  let filtered = data;
-                 let title = "📅 *DAFTAR KEGIATAN KKN (Mendatang)*\n\n";
+                 let title = "📅 *YUK INTIP JADWAL KKN DESA SOKARAJA!* 📅\n\n";
+                 let opening = `Kawan-kawan, ini rangkuman kegiatan yang masih berjalan & mendatang buat kalian! Jangan sampai miss, ya! 😎\n\n`;
 
                  if (!isNaN(weekParam) && weekParam >= 1 && weekParam <= 6) {
                      filtered = data.filter(i => i.week === weekParam).sort(sortByWeekAndDate);
-                     title = `📅 *DAFTAR KEGIATAN KKN MINGGU KE-${weekParam}*\n\n`;
+                     title = `📅 *DAFTAR KEGIATAN KKN MINGGU KE-${weekParam}* 📅\n\n`;
+                     opening = `Kawan-kawan, ini serangkaian agenda minggu ke-${weekParam}! Catat baik-baik, siapkan tenaga, kita kerjakan dengan kompak! 💪\n\n`;
                  } else {
                      const active = data.filter(i => i.status !== 'Selesai').sort(sortByWeekAndDate);
                      const done = data.filter(i => i.status === 'Selesai').sort(sortByWeekAndDate);
                      filtered = [...active, ...done].slice(0, 20);
                  }
 
-                 let jadwalMsg = title;
+                 let jadwalMsg = title + opening;
 
                  if (filtered.length === 0) {
-                     jadwalMsg += `Tidak ada kegiatan yang ditemukan.`;
+                     jadwalMsg += `Tidak ada kegiatan yang ditemukan. Sepertinya minggu ini kosong, jadikan waktu santai dulu, ya! 😄`;
                  } else {
                      filtered.forEach((item, index) => {
                          jadwalMsg += `${index + 1}. *[M${item.week}] ${item.proker}*\n`;
@@ -180,14 +209,15 @@ else if (text.startsWith('!jadwal')) {
                          jadwalMsg += `   📝 ${item.activity}\n`;
                          jadwalMsg += `   Status: [${item.status || 'Belum'}]\n\n`;
                      });
+                     jadwalMsg += `Jangan lupa, satu kegiatan beres = satu langkah kita maju. Semangat, kawan-kawan! 🔥`;
                  }
-                 jadwalMsg += `_Tip: Ketik !jadwal [1-6] untuk lihat per minggu (Cth: !jadwal 4)._`;
+                 jadwalMsg += `\n_Tip: Ketik !jadwal [1-6] untuk lihat per minggu (Cth: !jadwal 4)._` + BOT_FOOTER;
                  await sock.sendMessage(remoteJid, { text: jadwalMsg }, { quoted: msg });
              }
              else if (text === '!hariini' || text === '!today') {
-                 const data = await fetchRundownData();
+                 const data = await fetchRundownSupabase();
                  if (data.length === 0) {
-                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan di database." }, { quoted: msg });
+                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan di database." + BOT_FOOTER }, { quoted: msg });
                      return;
                  }
 
@@ -214,12 +244,12 @@ else if (text.startsWith('!jadwal')) {
                      hariIniMsg += `Semangat kerjanya, kawan-kawan! Kita kumpul, kita gas, kita menang! 💪🔥`;
                  }
 
-                 await sock.sendMessage(remoteJid, { text: hariIniMsg }, { quoted: msg });
+                 await sock.sendMessage(remoteJid, { text: hariIniMsg + BOT_FOOTER }, { quoted: msg });
              }
              else if (text === '!besok' || text === '!tomorrow') {
-                 const data = await fetchRundownData();
+                 const data = await fetchRundownSupabase();
                  if (data.length === 0) {
-                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan di database." }, { quoted: msg });
+                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan di database." + BOT_FOOTER }, { quoted: msg });
                      return;
                  }
 
@@ -249,12 +279,12 @@ else if (text.startsWith('!jadwal')) {
                      besokMsg += `Tidur cukup, datang on time, bawa semangat! Besok kita kumpul bareng! 🚀`;
                  }
 
-                 await sock.sendMessage(remoteJid, { text: besokMsg }, { quoted: msg });
+                 await sock.sendMessage(remoteJid, { text: besokMsg + BOT_FOOTER }, { quoted: msg });
              }
              else if (text === '!broadcast') {
                  const data = await fetchRundownData();
                  if (data.length === 0) {
-                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan untuk di-broadcast." }, { quoted: msg });
+                     await sock.sendMessage(remoteJid, { text: "⚠️ Belum ada data kegiatan untuk di-broadcast." + BOT_FOOTER }, { quoted: msg });
                      return;
                  }
 
@@ -270,8 +300,8 @@ else if (text.startsWith('!jadwal')) {
                      activeItems.forEach((item, index) => {
                          broadcastMsg += `${index + 1}. *[M${item.week}] ${item.proker}*\n`;
                          broadcastMsg += `   🗓️ ${item.date} (${item.time})\n`;
-                         broadcastMsg += `   📍 ${item.location || '-'}\n`;
-                         broadcastMsg += `   👤 PJ: ${item.pj || '-'}\n\n`;
+                         broadcastMsg += `   📝 ${item.activity}\n`;
+                         broadcastMsg += `   🏷️ Prioritas: ${item.priority || 'Sedang'}\n\n`;
                      });
                  }
 
@@ -281,32 +311,35 @@ else if (text.startsWith('!jadwal')) {
                  }
 
                  broadcastMsg += `\n==========================================\n`;
-                 broadcastMsg += `_Tetap jaga kekompakan, ya. Kita satu tim, satu tujuan! 🤝_\n`;
-                 broadcastMsg += `_Dikirim oleh bot KKN 0xfndLabs_ 🤖`;
+                 broadcastMsg += `_Tetap jaga kekompakan, ya. Kita satu tim, satu tujuan! 🤝_` + BOT_FOOTER;
 
                  await sock.sendMessage(remoteJid, { text: broadcastMsg }, { quoted: msg });
-                 await sock.sendMessage(remoteJid, { text: `✅ Broadcast berhasil dikirim!` }, { quoted: msg });
+                 await sock.sendMessage(remoteJid, { text: `✅ Broadcast berhasil dikirim!` + BOT_FOOTER }, { quoted: msg });
              }
              else if (text.startsWith('!kirim')) {
                  const parts = text.split(/\s+/);
                  if (parts.length < 2) {
-                     await sock.sendMessage(remoteJid, { text: "⚠️ Format: !kirim [nomor_wa] [pesan]\nContoh: !kirim 628123456789 Pesan uji coba" }, { quoted: msg });
+                     await sock.sendMessage(remoteJid, { text: "📩 *KIRIM PESAN KE MANA, KAWAN?* 🤔\n\nFormat: !kirim [nomor_wa] [pesan]\nContoh: !kirim 082338704085 Halo, jangan lupa rapat posko besok!" + BOT_FOOTER }, { quoted: msg });
                      return;
                  }
 
-                 const targetNumber = parts[1];
+                 let targetNumber = parts[1];
                  const pesan = parts.slice(2).join(' ') || 'Tidak ada pesan';
 
                  if (!targetNumber.endsWith('@s.whatsapp.net')) {
+                     targetNumber = targetNumber.replace(/[^0-9]/g, '');
+                     if (targetNumber.startsWith('0')) {
+                         targetNumber = '62' + targetNumber.slice(1);
+                     }
                      targetNumber = targetNumber + '@s.whatsapp.net';
                  }
 
                  try {
                      await sock.sendMessage(targetNumber, { text: pesan });
-                     await sock.sendMessage(remoteJid, { text: `✅ Pesan berhasil dikirim ke ${targetNumber}` }, { quoted: msg });
+                     await sock.sendMessage(remoteJid, { text: `✅ *PESAN BERHASIL TERKIRIM!* 🎉\n\n📤 Dikirim ke: *${targetNumber}*\n📝 Isi pesan:\n_"${pesan}"_\n\nSiap, kawan! Semoga dibalas dengan kabar baik! 😄` + BOT_FOOTER }, { quoted: msg });
                  } catch (sendErr) {
                      console.error("Gagal kirim:", sendErr);
-                     await sock.sendMessage(remoteJid, { text: "❌ Gagal mengirim pesan. Nomor mungkin tidak valid atau belum di-save di kontak." }, { quoted: msg });
+                     await sock.sendMessage(remoteJid, { text: "❌ *Yah, gagal terkirim!* 😅\n\nNomor mungkin tidak valid atau belum pernah di-save di kontak. Coba periksa lagi nomornya, ya!" + BOT_FOOTER }, { quoted: msg });
                  }
              }
         } catch (err) {

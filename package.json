@@ -7,6 +7,7 @@
     "start": "node bot.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.111.0",
     "@whiskeysockets/baileys": "^6.7.5",
     "firebase": "^10.8.0",
     "pino": "^8.19.0",
