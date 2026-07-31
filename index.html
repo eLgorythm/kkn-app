@@ -93,10 +93,6 @@
                 </div>
                 <!-- Top Action Buttons -->
                 <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="seedInitialData()" title="Upload 27 data default ke Firestore" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-3.5 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span>Sync Data Awal (27 Entry)</span>
-                    </button>
                     <button onclick="openProgressModal()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-4 py-2.5 rounded-lg text-sm shadow transition-all flex items-center space-x-2">
                         <i class="fa-solid fa-chart-line"></i>
                         <span>Lihat Progress</span>
@@ -344,11 +340,27 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Hari / Tanggal</label>
-                        <input type="text" id="input-date" required placeholder="Contoh: Selasa, 25 Aug 2026" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="date" id="input-date-native" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Waktu</label>
-                        <input type="text" id="input-time" required placeholder="Contoh: 09.00 – 12.00" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Jam Mulai</label>
+                        <input type="time" id="input-time-start" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Jam Selesai</label>
+                        <input type="time" id="input-time-end" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="mt-1 flex items-center space-x-2 text-[11px] text-slate-500 cursor-pointer select-none">
+                            <input type="checkbox" id="input-till-done" class="accent-indigo-600">
+                            <span>Sampai Selesai</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Preview</label>
+                        <p id="date-preview" class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-600 min-h-[38px]">—</p>
+                        <p id="time-preview" class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-600 min-h-[38px] mt-1">—</p>
                     </div>
                 </div>
 
@@ -507,42 +519,6 @@
           measurementId: "G-RVPK4RHNLH"
         };
 
-        // Data Default 27 Kegiatan KKN (Minggu 1 s/d Minggu 3)
-        const defaultDataset = [
-            // MINGGU 1 (4 Aug - 10 Aug 2026)
-            { id: "kkn_101", week: 1, date: "Selasa, 4 Aug 2026", time: "08.00 – 11.00", proker: "Penerjunan & Sowan", activity: "Penerjunan resmi mahasiswa KKN ke lokasi desa, penerimaan oleh perangkat desa, serta penataan posko.", priority: "Tinggi", status: "Selesai" },
-            { id: "kkn_102", week: 1, date: "Selasa, 4 Aug 2026", time: "13.00 – 16.00", proker: "Observasi Desa", activity: "Silaturahmi dan sowan ke kediaman Ketua RT/RW, tokoh masyarakat, serta sesepuh desa setempat.", priority: "Tinggi", status: "Selesai" },
-            { id: "kkn_103", week: 1, date: "Rabu, 5 Aug 2026", time: "09.00 – 12.00", proker: "Proker Sampah", activity: "Observasi lapangan ke titik-titik pembuangan sampah warga dan pemetaan permasalahan sampah desa.", priority: "Sedang", status: "Selesai" },
-            { id: "kkn_104", week: 1, date: "Rabu, 5 Aug 2026", time: "15.30 – 17.00", proker: "Proker Sampah", activity: "Diskusi dan koordinasi awal dengan pengurus Bank Sampah / Karang Taruna terkait tata kelola sampah.", priority: "Sedang", status: "Selesai" },
-            { id: "kkn_105", week: 1, date: "Kamis, 6 Aug 2026", time: "09.00 – 11.30", proker: "Proker Sampah", activity: "Pembuatan media edukasi (poster, pamflet) dan penyiapan fasilitas tempat sampah pemilahan.", priority: "Rendah", status: "Selesai" },
-            { id: "kkn_106", week: 1, date: "Jumat, 7 Aug 2026", time: "08.00 – 11.00", proker: "Proker Sampah", activity: "Aksi Kerja Bakti Lingkungan bersama warga untuk pembersihan area publik dan tempat pembuangan liar.", priority: "Tinggi", status: "Selesai" },
-            { id: "kkn_107", week: 1, date: "Jumat, 7 Aug 2026", time: "13.30 – 15.30", proker: "Proker Sampah", activity: "Pengadaan dan penempatan tong sampah pemilahan (organik/anorganik) di titik-titik vital.", priority: "Sedang", status: "Selesai" },
-            { id: "kkn_108", week: 1, date: "Sabtu, 8 Aug 2026", time: "09.00 – 11.30", proker: "Proker Sampah", activity: "Sosialisasi \"Pengelolaan & Pemilahan Sampah Rumah Tangga\" bersama kelompok warga / ibu-ibu PKK.", priority: "Tinggi", status: "Selesai" },
-            { id: "kkn_109", week: 1, date: "Minggu, 9 Aug 2026", time: "08.00 – 11.00", proker: "Proker Sampah", activity: "Pelatihan pemanfaatan sampah anorganik.", priority: "Sedang", status: "Selesai" },
-            { id: "kkn_110", week: 1, date: "Senin, 10 Aug 2026", time: "09.00 – 12.00", proker: "Proker Sampah", activity: "Penyelesaian dan rekap data hasil pemilahan serta pengolahan sampah.", priority: "Rendah", status: "Selesai" },
-
-            // MINGGU 2 (11 Aug - 17 Aug 2026)
-            { id: "kkn_201", week: 2, date: "Selasa, 11 Aug 2026", time: "15.30 – 17.00", proker: "Proker TPQ", activity: "Pendampingan dan kegiatan mengajar mengaji rutin di TPQ desa (Materi Tajwid & Makhraj).", priority: "Sedang", status: "Sedang" },
-            { id: "kkn_202", week: 2, date: "Selasa, 11 Aug 2026", time: "19.30 – 21.00", proker: "Proker Agustusan", activity: "Rapat pemantapan teknis perlombaan HUT RI bersama pengurus Karang Taruna dan panitia desa.", priority: "Tinggi", status: "Sedang" },
-            { id: "kkn_203", week: 2, date: "Rabu, 12 Aug 2026", time: "15.30 – 17.00", proker: "Proker TPQ", activity: "Mengajar mengaji serta bimbingan hafalan surah-surah pendek dan doa harian anak-anak TPQ.", priority: "Sedang", status: "Belum" },
-            { id: "kkn_204", week: 2, date: "Rabu, 12 Aug 2026", time: "19.00 – 21.00", proker: "Proker Agustusan", activity: "Persiapan arena, pendaftaran peserta, dan perlengkapan logistik perlombaan Agustusan.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_205", week: 2, date: "Kamis, 13 Aug 2026", time: "15.30 – 17.00", proker: "Proker TPQ", activity: "Pelatihan dan bimbingan praktik ibadah, dan pembinaan akhlak anak-anak TPQ.", priority: "Sedang", status: "Belum" },
-            { id: "kkn_206", week: 2, date: "Jumat, 14 Aug 2026", time: "14.00 – 17.00", proker: "Proker Agustusan", activity: "Pembukaan dan pelaksanaan Lomba Agustusan Kategori Anak-Anak.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_207", week: 2, date: "Sabtu, 15 Aug 2026", time: "14.00 – 17.30", proker: "Proker Agustusan", activity: "Pelaksanaan Perlombaan Agustusan Kategori Umum / Orang Tua.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_208", week: 2, date: "Minggu, 16 Aug 2026", time: "19.30 – Selesai", proker: "Proker Agustusan", activity: "Malam Tirakatan, Pentas Seni Puncak Kemerdekaan RI, serta Pembagian Hadiah Lomba.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_209", week: 2, date: "Senin, 17 Aug 2026", time: "07.00 – 09.00", proker: "HUT Kemerdekaan", activity: "Kehadiran dan partisipasi penuh pada Upacara Bendera Peringatan HUT RI Ke-81 tingkat Desa/Kecamatan.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_210", week: 2, date: "Senin, 17 Aug 2026", time: "10.00 – 13.00", proker: "Proker Agustusan", activity: "Kerja bakti pembersihan dan pembenahan area bekas panggung / tempat perlombaan Agustusan.", priority: "Rendah", status: "Belum" },
-
-            // MINGGU 3 (18 Aug - 24 Aug 2026)
-            { id: "kkn_301", week: 3, date: "Selasa, 18 Aug 2026", time: "09.00 – 12.00", proker: "Proker Stunting", activity: "Koordinasi teknis dengan Bidan Desa, Kader Posyandu, dan Pihak Puskesmas setempat.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_302", week: 3, date: "Rabu, 19 Aug 2026", time: "09.00 – 11.30", proker: "Proker Stunting", activity: "Validasi data balita, ibu hamil, serta pemetaan zonasi risiko stunting di tingkat RT/RW.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_303", week: 3, date: "Kamis, 20 Aug 2026", time: "09.00 – 12.00", proker: "Proker Stunting", activity: "Penyusunan modul sosialisasi gizi buruk dan penyiapan bahan Pemberian Makanan Tambahan (PMT).", priority: "Sedang", status: "Belum" },
-            { id: "kkn_304", week: 3, date: "Jumat, 21 Aug 2026", time: "08.00 – 11.00", proker: "Proker Stunting", activity: "Pendampingan Kegiatan Posyandu: Penimbangan berat, pengukuran panjang badan, dan rekap gizi balita.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_305", week: 3, date: "Sabtu, 22 Aug 2026", time: "09.00 – 11.30", proker: "Proker Stunting", activity: "Seminar & Sosialisasi \"Pencegahan Stunting Melalui Pola Asuh Gizi Seimbang\" bagi Ibu Hamil & Balita.", priority: "Tinggi", status: "Belum" },
-            { id: "kkn_306", week: 3, date: "Minggu, 23 Aug 2026", time: "08.30 – 11.00", proker: "Proker Stunting", activity: "Edukasi Pemanfaatan Bahan Pangan Lokal untuk Menu Sehat Keluarga.", priority: "Sedang", status: "Belum" },
-            { id: "kkn_307", week: 3, date: "Senin, 24 Aug 2026", time: "09.00 – 12.00", proker: "Proker Stunting", activity: "Penyusunan rekapitulasi data posyandu dan pengarsipan materi edukasi stunting.", priority: "Rendah", status: "Belum" }
-        ];
-
         let db = null;
         let rundownCollection = null;
         let scheduleData = [];
@@ -580,66 +556,41 @@
                 });
             } catch (e) {
                 console.error("Firebase init error:", e);
-                scheduleData = [...defaultDataset];
-                window.scheduleData = scheduleData;
-                if (typeof window.renderTable === 'function') {
-                    window.renderTable();
-                }
-            }
-        } else {
-            // Local fallback dataset if Firebase key is placeholder
-            scheduleData = [...defaultDataset];
-            window.scheduleData = scheduleData;
-            if (typeof window.renderTable === 'function') {
-                window.renderTable();
             }
         }
-
-        // ==========================================
-        // Seed Initial Data into Firestore
-        // ==========================================
-        window.seedInitialData = async function() {
-            if (!isFirebaseConfigured || !db) {
-                showToast("Data lokal sudah di-load! Masukkan API Key Firebase untuk sync ke Cloud", "danger");
-                scheduleData = [...defaultDataset];
-                window.scheduleData = scheduleData;
-                if (typeof window.renderTable === 'function') window.renderTable();
-                return;
-            }
-
-            try {
-                showToast("Sedang mengunggah 27 kegiatan ke Firestore...", "info");
-                const batch = writeBatch(db);
-
-                defaultDataset.forEach((item) => {
-                    const docRef = doc(db, "rundown_kkn", String(item.id));
-                    batch.set(docRef, {
-                        week: item.week,
-                        date: item.date,
-                        time: item.time,
-                        proker: item.proker,
-                        activity: item.activity,
-                        priority: item.priority || "Sedang",
-                        status: item.status || "Belum",
-                        updatedAt: new Date().toISOString()
-                    });
-                });
-
-                await batch.commit();
-                showToast("Berhasil Sync 27 Kegiatan KKN (M1 - M3) ke Firestore!");
-            } catch (err) {
-                console.error("Seed error:", err);
-                showToast("Gagal Upload: " + err.message, "danger");
-            }
-        };
 
         // Save / Update Document Function
         window.saveItem = async function(event) {
             event.preventDefault();
             const id = document.getElementById('item-id').value;
             const week = parseInt(document.getElementById('input-week').value);
-            const date = document.getElementById('input-date').value.trim();
-            const time = document.getElementById('input-time').value.trim();
+
+            const dateNative = document.getElementById('input-date-native').value;
+            const timeStart = document.getElementById('input-time-start').value;
+            const timeEnd = document.getElementById('input-time-end').value;
+            const tillDone = document.getElementById('input-till-done').checked;
+
+            if (!dateNative) {
+                showToast('Pilih tanggal kegiatan dulu, ya!', 'danger');
+                return;
+            }
+            if (!timeStart) {
+                showToast('Isi jam mulai kegiatan.', 'danger');
+                return;
+            }
+            if (!timeEnd && !tillDone) {
+                showToast('Isi jam selesai atau centang "Sampai Selesai".', 'danger');
+                return;
+            }
+
+            const date = formatDateId(dateNative);
+            let time = formatTimeId(timeStart);
+            if (tillDone) {
+                time += ' – Selesai';
+            } else {
+                time += ' – ' + formatTimeId(timeEnd);
+            }
+
             const proker = document.getElementById('input-proker').value.trim();
             const priority = document.getElementById('input-priority').value;
             const status = document.getElementById('input-status').value;
@@ -772,6 +723,75 @@
             return new Date(year, month, day).getTime();
         }
 
+        // Convert "YYYY-MM-DD" (date input) to "Senin, 25 Aug 2026" (format penyimpanan)
+        function formatDateId(isoDate) {
+            if (!isoDate) return '';
+            const d = new Date(isoDate + 'T00:00:00');
+            const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Des'];
+            return `${dayNames[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        // Convert "Senin, 25 Aug 2026" ke "2026-08-25" (untuk edit)
+        function parseDateToNative(dateStr) {
+            const months = { Jan:0, Feb:1, Mar:2, Apr:3, Mei:4, Jun:5, Jul:6, Aug:7, Sep:8, Okt:9, Nov:10, Des:11 };
+            const parts = String(dateStr || '').split(",")[1]?.trim().split(" ");
+            if (!parts || parts.length < 3) return '';
+            const day = parseInt(parts[0]);
+            const month = months[parts[1]];
+            const year = parseInt(parts[2]);
+            if (!day || month === undefined || !year) return '';
+            return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+
+        // Convert "HH:MM" (time input) ke "HH.MM"
+        function formatTimeId(hhmm) {
+            if (!hhmm) return '';
+            const [h, m] = hhmm.split(':');
+            return `${h}.${m}`;
+        }
+
+        // Convert "19.30" ke "19:30" (untuk edit)
+        function parseTimeToNative(dottedTime) {
+            const m = String(dottedTime || '').match(/(\d{1,2})\.(\d{2})/);
+            if (!m) return '';
+            return `${String(parseInt(m[1])).padStart(2, '0')}:${m[2]}`;
+        }
+
+        function updateDatePreview() {
+            const val = document.getElementById('input-date-native').value;
+            document.getElementById('date-preview').textContent = val ? '📅 ' + formatDateId(val) : '—';
+        }
+
+        function updateTimePreview() {
+            const start = document.getElementById('input-time-start').value;
+            const end = document.getElementById('input-time-end').value;
+            const tillDone = document.getElementById('input-till-done').checked;
+            const preview = document.getElementById('time-preview');
+            if (!start) {
+                preview.textContent = '—';
+                return;
+            }
+            let result = '⏰ ' + formatTimeId(start);
+            if (tillDone) {
+                result += ' – Selesai';
+            } else if (end) {
+                result += ' – ' + formatTimeId(end);
+            }
+            preview.textContent = result;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateNative = document.getElementById('input-date-native');
+            const timeStart = document.getElementById('input-time-start');
+            const timeEnd = document.getElementById('input-time-end');
+            const tillDone = document.getElementById('input-till-done');
+            if (dateNative) dateNative.addEventListener('change', updateDatePreview);
+            if (timeStart) timeStart.addEventListener('input', updateTimePreview);
+            if (timeEnd) timeEnd.addEventListener('input', updateTimePreview);
+            if (tillDone) tillDone.addEventListener('change', updateTimePreview);
+        });
+
         // Render Table Data globally
         window.renderTable = function() {
             const dataList = window.scheduleData || [];
@@ -898,6 +918,8 @@
             document.getElementById('modal-title').innerText = 'Tambah Kegiatan Baru';
             document.getElementById('item-id').value = '';
             document.getElementById('modal-form').reset();
+            document.getElementById('date-preview').textContent = '—';
+            document.getElementById('time-preview').textContent = '—';
             document.getElementById('item-modal').classList.remove('hidden');
         }
 
@@ -1001,12 +1023,23 @@
             document.getElementById('modal-title').innerText = 'Edit Kegiatan KKN';
             document.getElementById('item-id').value = item.id;
             document.getElementById('input-week').value = item.week;
-            document.getElementById('input-date').value = item.date;
-            document.getElementById('input-time').value = item.time;
+            document.getElementById('input-date-native').value = parseDateToNative(item.date) || '';
+            const timeParts = String(item.time || '').split('–').map(s => s.trim());
+            document.getElementById('input-time-start').value = parseTimeToNative(timeParts[0]) || '';
+            const endRaw = timeParts[1] || '';
+            if (endRaw.toLowerCase().includes('selesai')) {
+                document.getElementById('input-till-done').checked = true;
+                document.getElementById('input-time-end').value = '';
+            } else {
+                document.getElementById('input-till-done').checked = false;
+                document.getElementById('input-time-end').value = parseTimeToNative(endRaw) || '';
+            }
             document.getElementById('input-proker').value = item.proker;
             document.getElementById('input-priority').value = item.priority || 'Sedang';
             document.getElementById('input-status').value = item.status || 'Belum';
             document.getElementById('input-activity').value = item.activity;
+            updateDatePreview();
+            updateTimePreview();
 
             document.getElementById('item-modal').classList.remove('hidden');
         }
