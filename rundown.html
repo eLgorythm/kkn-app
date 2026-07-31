@@ -997,7 +997,8 @@ WITH CHECK (true);</pre>
                         item.day,
                         item.time,
                         item.category,
-                        item.title + (item.notes ? ' — ' + item.notes : ''),
+                        item.title || '-',
+                        item.notes || '-',
                         item.location || '-',
                         item.pj || '-'
                     ]);
@@ -1008,7 +1009,7 @@ WITH CHECK (true);</pre>
 
                     doc.autoTable({
                         startY: 37,
-                        head: [['Hari', 'Waktu', 'Kategori', 'Nama Agenda', 'Lokasi', 'PJ']],
+                        head: [['Hari', 'Waktu', 'Kategori', 'Nama Agenda', 'Rincian', 'Lokasi', 'PJ']],
                         body: rows,
                         theme: 'grid',
                         headStyles: {
@@ -1026,13 +1027,13 @@ WITH CHECK (true);</pre>
                             fillColor: [248, 250, 252]
                         },
                         columnStyles: {
-                            0: { cellWidth: 28 },
-                            1: { cellWidth: 26 },
+                            0: { cellWidth: 26 },
+                            1: { cellWidth: 24 },
                             2: { cellWidth: 30 },
                             3: { cellWidth: 'auto' },
-                            4: { cellWidth: 28 },
-                            5: { cellWidth: 28 },
-                            6: { cellWidth: 22 }
+                            4: { cellWidth: 'auto' },
+                            5: { cellWidth: 26 },
+                            6: { cellWidth: 26 }
                         },
                         margin: { left: 14, right: 14 },
                         tableLineColor: [203, 213, 225],
