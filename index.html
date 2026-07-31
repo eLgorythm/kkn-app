@@ -230,43 +230,43 @@
                 </div>
 
                 <!-- Search, Filter & Export -->
-                <div class="flex flex-col sm:flex-row gap-2.5">
-                    <div class="relative flex-1 sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" id="search-input" oninput="renderTable()" placeholder="Cari kegiatan/proker..." class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                <div class="flex flex-col gap-2.5">
+                    <div class="flex flex-col sm:flex-row gap-2.5">
+                        <div class="relative flex-1 sm:w-72">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="text" id="search-input" oninput="renderTable()" placeholder="Cari kegiatan/proker..." class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                        </div>
+                        <select id="proker-filter" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="all">Semua Proker</option>
+                        </select>
+                        <button onclick="resetFilters()" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 bg-white transition-all flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            Reset
+                        </button>
                     </div>
-                    <!-- Filter Status -->
-                    <select id="status-filter" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="all">Semua Status</option>
-                        <option value="Belum">⌛ Belum</option>
-                        <option value="Sedang">🔄 Sedang</option>
-                        <option value="Selesai">✅ Selesai</option>
-                    </select>
 
-                    <!-- Filter Prioritas -->
-                    <select id="priority-filter" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="all">Semua Prioritas</option>
-                        <option value="Tinggi">🔴 Tinggi</option>
-                        <option value="Sedang">🟠 Sedang</option>
-                        <option value="Rendah">🟢 Rendah</option>
-                    </select>
+                    <!-- Filter Status (Segmented) -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap"><i class="fa-solid fa-list-check text-indigo-400 mr-1"></i>Status</span>
+                        <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg">
+                            <button type="button" data-group="status" data-value="all" onclick="setFilter('status','all')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all bg-white text-indigo-900 shadow-sm">Semua</button>
+                            <button type="button" data-group="status" data-value="Belum" onclick="setFilter('status','Belum')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-slate-600 hover:text-slate-900">⌛ Belum</button>
+                            <button type="button" data-group="status" data-value="Sedang" onclick="setFilter('status','Sedang')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-slate-600 hover:text-slate-900">🔄 Sedang</button>
+                            <button type="button" data-group="status" data-value="Selesai" onclick="setFilter('status','Selesai')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-slate-600 hover:text-slate-900">✅ Selesai</button>
+                        </div>
+                    </div>
 
-                    <select id="proker-filter" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="all">Semua Proker</option>
-                        <option value="Penerjunan & Sowan">Penerjunan & Sowan</option>
-                        <option value="Observasi Desa">Observasi Desa</option>
-                        <option value="Proker Sampah">Proker Sampah</option>
-                        <option value="Proker TPQ">Proker TPQ</option>
-                        <option value="Proker Agustusan">Proker Agustusan</option>
-                        <option value="HUT Kemerdekaan">HUT Kemerdekaan</option>
-                        <option value="Proker Stunting">Proker Stunting</option>
-                        <option value="Proker UMKM">Proker UMKM</option>
-                        <option value="Proker Digitalisasi">Proker Digitalisasi</option>
-                        <option value="Proker Sekolah">Proker Sekolah</option>
-                        <option value="Proker Lingkungan">Proker Lingkungan</option>
-                        <option value="Penyusunan Laporan">Penyusunan Laporan</option>
-                        <option value="Penutupan & Penarikan">Penutupan & Penarikan</option>
-                    </select>
+                    <!-- Filter Prioritas (Segmented) -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap"><i class="fa-solid fa-bullseye text-indigo-400 mr-1"></i>Prioritas</span>
+                        <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg">
+                            <button type="button" data-group="priority" data-value="all" onclick="setFilter('priority','all')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all bg-white text-indigo-900 shadow-sm">Semua</button>
+                            <button type="button" data-group="priority" data-value="Tinggi" onclick="setFilter('priority','Tinggi')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-slate-600 hover:text-slate-900">🔴 Tinggi</button>
+                            <button type="button" data-group="priority" data-value="Sedang" onclick="setFilter('priority','Sedang')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-slate-600 hover:text-slate-900">🟠 Sedang</button>
+                            <button type="button" data-group="priority" data-value="Rendah" onclick="setFilter('priority','Rendah')" class="filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-slate-600 hover:text-slate-900">🟢 Rendah</button>
+                        </div>
+                        <span id="result-count" class="text-[11px] font-bold text-slate-500 ml-auto"></span>
+                    </div>
                 </div>
 
             </div>
@@ -792,15 +792,39 @@
             if (tillDone) tillDone.addEventListener('change', updateTimePreview);
         });
 
+        // Filter State & Segmented Button Handlers
+        window.filterState = { status: 'all', priority: 'all' };
+
+        const FILTER_BTN_CLASS = "filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-slate-600 hover:text-slate-900";
+        const FILTER_BTN_ACTIVE_CLASS = "filter-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all bg-white text-indigo-900 shadow-sm";
+
+        function setFilter(group, value) {
+            window.filterState[group] = value;
+            document.querySelectorAll(`.filter-btn[data-group="${group}"]`).forEach(btn => {
+                btn.className = String(btn.dataset.value) === String(value) ? FILTER_BTN_ACTIVE_CLASS : FILTER_BTN_CLASS;
+            });
+            renderTable();
+        }
+
+        function updateProkerFilter(dataList) {
+            const sel = document.getElementById('proker-filter');
+            if (!sel) return;
+            const prevVal = sel.value;
+            const prokers = [...new Set((dataList || []).map(i => i.proker).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            sel.innerHTML = '<option value="all">Semua Proker</option>' + prokers.map(p => `<option value="${p}">${p}</option>`).join('');
+            sel.value = (prevVal === 'all' || prokers.includes(prevVal)) ? prevVal : 'all';
+        }
+
         // Render Table Data globally
         window.renderTable = function() {
             const dataList = window.scheduleData || [];
+            updateProkerFilter(dataList);
             const tableBody = document.getElementById('table-body');
             const emptyState = document.getElementById('empty-state');
             const searchKeyword = (document.getElementById('search-input') ? document.getElementById('search-input').value : '').toLowerCase();
             const selectedProker = document.getElementById('proker-filter') ? document.getElementById('proker-filter').value : 'all';
-            const statusFilter = document.getElementById('status-filter') ? document.getElementById('status-filter').value : 'all';
-            const priorityFilter = document.getElementById('priority-filter') ? document.getElementById('priority-filter').value : 'all';
+            const statusFilter = (window.filterState && window.filterState.status) || 'all';
+            const priorityFilter = (window.filterState && window.filterState.priority) || 'all';
             const weekFilter = window.currentWeekFilter || 'all';
 
 // Filter data
@@ -823,6 +847,9 @@
                  if (wa !== wb) return wa - wb;
                  return parseDateString(a.date) - parseDateString(b.date);
              });
+
+             const countEl = document.getElementById('result-count');
+             if (countEl) countEl.innerText = `${filteredData.length} kegiatan`;
 
              // Update Statistics
             updateStats(dataList);
@@ -907,9 +934,10 @@
 
         function resetFilters() {
             if (document.getElementById('search-input')) document.getElementById('search-input').value = '';
-            if (document.getElementById('proker-filter')) document.getElementById('proker-filter').value = 'all';
-            if (document.getElementById('status-filter')) document.getElementById('status-filter').value = 'all';
-            if (document.getElementById('priority-filter')) document.getElementById('priority-filter').value = 'all';
+            const prokerSel = document.getElementById('proker-filter');
+            if (prokerSel) prokerSel.value = 'all';
+            setFilter('status', 'all');
+            setFilter('priority', 'all');
             setWeekFilter('all');
         }
 
