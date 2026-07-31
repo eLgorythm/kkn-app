@@ -312,7 +312,12 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Rentang Waktu <span class="text-rose-500">*</span></label>
-                        <input type="text" id="input-time" placeholder="misal: 08.00 - 10.00" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <div class="flex items-center gap-2">
+                            <input type="time" id="input-time-start" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <span class="text-slate-400 text-xs font-bold">-</span>
+                            <input type="time" id="input-time-end" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <p id="time-preview" class="text-[11px] text-slate-500 mt-1.5 font-medium"><i class="fa-solid fa-arrows-left-right text-slate-400 mr-1"></i>Pilih jam mulai & selesai</p>
                     </div>
                 </div>
 
@@ -478,6 +483,8 @@ WITH CHECK (true);</pre>
         let scheduleData = [];
 
         window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('input-time-start').addEventListener('change', updateTimePreview);
+            document.getElementById('input-time-end').addEventListener('change', updateTimePreview);
             await fetchSupabaseData();
             setupRealtimeSubscription();
         });
@@ -563,15 +570,49 @@ WITH CHECK (true);</pre>
             }
         }
 
+        // ==========================================
+        // Time Picker Helpers
+        // ==========================================
+        function formatTimeId(val) {
+            if (!val) return '';
+            const parts = val.split(':');
+            if (parts.length < 2) return val;
+            return parts[0].padStart(2, '0') + '.' + parts[1];
+        }
+
+        function parseTimeToNative(timeStr) {
+            const m = String(timeStr || '').match(/(\d{1,2})[.:](\d{2})/g);
+            if (m && m.length >= 2) {
+                const start = m[0].replace('.', ':');
+                const end = m[1].replace('.', ':');
+                return { start, end };
+            }
+            return { start: '', end: '' };
+        }
+
+        function updateTimePreview() {
+            const start = document.getElementById('input-time-start').value;
+            const end = document.getElementById('input-time-end').value;
+            const preview = document.getElementById('time-preview');
+            if (start && end) {
+                preview.innerHTML = `<i class="fa-solid fa-arrows-left-right text-indigo-400 mr-1"></i>${formatTimeId(start)} - ${formatTimeId(end)}`;
+            } else {
+                preview.innerHTML = `<i class="fa-solid fa-arrows-left-right text-slate-400 mr-1"></i>Pilih jam mulai & selesai`;
+            }
+        }
+
         async function saveActivity(e) {
             e.preventDefault();
 
             const editId = document.getElementById('edit-id').value;
+            const timeStart = document.getElementById('input-time-start').value;
+            const timeEnd = document.getElementById('input-time-end').value;
+            const time = `${formatTimeId(timeStart)} - ${formatTimeId(timeEnd)}`;
             const newItem = {
                 id: editId || Date.now().toString(),
                 week: currentWeek,
                 day: document.getElementById('input-day').value,
-                time: document.getElementById('input-time').value,
+                time: time,
                 category: document.getElementById('input-category').value,
                 title: document.getElementById('input-title').value,
                 location: document.getElementById('input-location').value,
@@ -817,6 +858,9 @@ WITH CHECK (true);</pre>
         function openAddModal() {
             document.getElementById('form-activity').reset();
             document.getElementById('edit-id').value = '';
+            document.getElementById('input-time-start').value = '';
+            document.getElementById('input-time-end').value = '';
+            updateTimePreview();
             document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-400"></i> <span>Tambah Agenda Harian</span>`;
             if (selectedDayFilter !== 'all') {
                 document.getElementById('input-day').value = selectedDayFilter;
@@ -834,7 +878,10 @@ WITH CHECK (true);</pre>
 
             document.getElementById('edit-id').value = item.id;
             document.getElementById('input-day').value = item.day;
-            document.getElementById('input-time').value = item.time;
+            const parsedTime = parseTimeToNative(item.time);
+            document.getElementById('input-time-start').value = parsedTime.start;
+            document.getElementById('input-time-end').value = parsedTime.end;
+            updateTimePreview();
             document.getElementById('input-category').value = item.category || 'Proker Utama';
             document.getElementById('input-title').value = item.title;
             document.getElementById('input-location').value = item.location || '';
