@@ -168,31 +168,31 @@
 
             <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Selesai</span>
-                    <span id="stat-completed" class="text-2xl font-black text-emerald-600">0</span>
+                    <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block">Proker Utama</span>
+                    <span id="stat-proker-utama" class="text-2xl font-black text-indigo-600">0</span>
                 </div>
-                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-circle-check"></i>
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-star"></i>
                 </div>
             </div>
 
             <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Sedang Jalan</span>
-                    <span id="stat-progress" class="text-2xl font-black text-amber-600">0</span>
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider block">Proker Pendukung</span>
+                    <span id="stat-proker-pendukung" class="text-2xl font-black text-sky-600">0</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Agenda Hari Ini</span>
+                    <span id="stat-hari-ini" class="text-2xl font-black text-amber-600">0</span>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-spinner"></i>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-                <div>
-                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">% Ketercapaian</span>
-                    <span id="stat-percentage" class="text-2xl font-black text-indigo-600">0%</span>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-chart-line"></i>
+                    <i class="fa-solid fa-calendar-day"></i>
                 </div>
             </div>
         </div>
@@ -205,13 +205,6 @@
             </div>
 
             <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
-                <select id="filter-status" onchange="renderSchedule()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
-                    <option value="all">Semua Status</option>
-                    <option value="Belum">Belum Mulai</option>
-                    <option value="Sedang Berlangsung">Sedang Berlangsung</option>
-                    <option value="Selesai">Selesai</option>
-                </select>
-
                 <select id="filter-category" onchange="renderSchedule()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
                     <option value="all">Semua Kategori</option>
                     <option value="Rutinitas Posko">Rutinitas Posko</option>
@@ -252,7 +245,6 @@
                             <th class="py-3 px-4 min-w-[220px]">Nama Kegiatan & Rincian</th>
                             <th class="py-3 px-4 w-32">Lokasi</th>
                             <th class="py-3 px-4 w-36">Penanggung Jawab (PJ)</th>
-                            <th class="py-3 px-4 w-28">Status</th>
                             <th class="py-3 px-4 w-24 text-center no-print">Aksi</th>
                         </tr>
                     </thead>
@@ -348,19 +340,9 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Kegiatan</label>
-                        <select id="input-status" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                            <option value="Belum">Belum Mulai</option>
-                            <option value="Sedang Berlangsung">Sedang Berlangsung</option>
-                            <option value="Selesai">Selesai</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Perlengkapan / Catatan</label>
-                        <input type="text" id="input-notes" placeholder="misal: Bawa proyektor & daftar hadir" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Perlengkapan / Catatan</label>
+                    <input type="text" id="input-notes" placeholder="misal: Bawa proyektor & daftar hadir" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
 
                 <!-- Footer Actions -->
@@ -430,7 +412,6 @@
   title TEXT,
   location TEXT,
   pj TEXT,
-  status TEXT,
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -623,7 +604,6 @@ WITH CHECK (true);</pre>
                 title: document.getElementById('input-title').value,
                 location: document.getElementById('input-location').value,
                 pj: document.getElementById('input-pj').value,
-                status: document.getElementById('input-status').value,
                 notes: document.getElementById('input-notes').value
             };
 
@@ -745,7 +725,6 @@ WITH CHECK (true);</pre>
             const tbody = document.getElementById('schedule-tbody');
             const emptyState = document.getElementById('empty-state');
             const searchQuery = document.getElementById('search-input').value.toLowerCase();
-            const statusFilter = document.getElementById('filter-status').value;
             const categoryFilter = document.getElementById('filter-category').value;
 
             // Filter logic
@@ -755,10 +734,9 @@ WITH CHECK (true);</pre>
                 const matchSearch = item.title.toLowerCase().includes(searchQuery) || 
                                     (item.pj && item.pj.toLowerCase().includes(searchQuery)) ||
                                     (item.location && item.location.toLowerCase().includes(searchQuery));
-                const matchStatus = (statusFilter === 'all') || (item.status === statusFilter);
                 const matchCategory = (categoryFilter === 'all') || (item.category === categoryFilter);
 
-                return matchDay && matchWeek && matchSearch && matchStatus && matchCategory;
+                return matchDay && matchWeek && matchSearch && matchCategory;
             });
 
             // Calculate Stats
@@ -803,9 +781,6 @@ WITH CHECK (true);</pre>
                     <td class="py-3 px-4 text-slate-700 font-medium whitespace-nowrap">
                         <i class="fa-solid fa-user-gear text-indigo-400 mr-1 text-[11px]"></i>${item.pj || '-'}
                     </td>
-                    <td class="py-3 px-4 whitespace-nowrap">
-                        ${getStatusBadge(item.status)}
-                    </td>
                     <td class="py-3 px-4 text-center whitespace-nowrap no-print">
                         <button onclick="editActivity('${item.id}')" title="Edit Agenda" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
                             <i class="fa-solid fa-pen-to-square"></i>
@@ -824,14 +799,15 @@ WITH CHECK (true);</pre>
         // Calculate Stats Metrics
         function calculateStats(items) {
             const total = items.length;
-            const completed = items.filter(i => i.status === 'Selesai').length;
-            const progress = items.filter(i => i.status === 'Sedang Berlangsung').length;
-            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const prokerUtama = items.filter(i => i.category === 'Proker Utama').length;
+            const prokerPendukung = items.filter(i => i.category === 'Proker Pendukung').length;
+            const todayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date().getDay()];
+            const hariIni = items.filter(i => i.day === todayName).length;
 
             document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-completed').innerText = completed;
-            document.getElementById('stat-progress').innerText = progress;
-            document.getElementById('stat-percentage').innerText = `${percent}%`;
+            document.getElementById('stat-proker-utama').innerText = prokerUtama;
+            document.getElementById('stat-proker-pendukung').innerText = prokerPendukung;
+            document.getElementById('stat-hari-ini').innerText = hariIni;
         }
 
         // Badge Helpers
@@ -847,17 +823,6 @@ WITH CHECK (true);</pre>
                     return `<span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200">Evaluasi</span>`;
                 default:
                     return `<span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200">Rutinitas</span>`;
-            }
-        }
-
-        function getStatusBadge(st) {
-            switch(st) {
-                case 'Selesai':
-                    return `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-circle-check"></i> Selesai</span>`;
-                case 'Sedang Berlangsung':
-                    return `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-spinner animate-spin"></i> Sedang Jalan</span>`;
-                default:
-                    return `<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-600 text-[10px] font-medium px-2 py-0.5 rounded"><i class="fa-regular fa-circle"></i> Belum Mulai</span>`;
             }
         }
 
@@ -893,7 +858,6 @@ WITH CHECK (true);</pre>
             document.getElementById('input-title').value = item.title;
             document.getElementById('input-location').value = item.location || '';
             document.getElementById('input-pj').value = item.pj || '';
-            document.getElementById('input-status').value = item.status || 'Belum';
             document.getElementById('input-notes').value = item.notes || '';
 
             document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-400"></i> <span>Edit Agenda Harian</span>`;
@@ -950,7 +914,7 @@ WITH CHECK (true);</pre>
             }
 
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-            csvContent += "Pekan,Hari,Waktu,Kategori,Nama Agenda,Lokasi,PJ,Status,Catatan\n";
+            csvContent += "Pekan,Hari,Waktu,Kategori,Nama Agenda,Lokasi,PJ,Catatan\n";
 
             const weeks = [1, 2, 3, 4, 5, 6];
             let totalExported = 0;
@@ -975,7 +939,6 @@ WITH CHECK (true);</pre>
                         esc(i.title),
                         esc(i.location),
                         esc(i.pj),
-                        esc(i.status),
                         esc(i.notes)
                     ];
                     csvContent += row.join(",") + "\n";
@@ -1036,8 +999,7 @@ WITH CHECK (true);</pre>
                         item.category,
                         item.title + (item.notes ? ' — ' + item.notes : ''),
                         item.location || '-',
-                        item.pj || '-',
-                        item.status
+                        item.pj || '-'
                     ]);
 
                     if (typeof doc.autoTable !== 'function') {
@@ -1046,7 +1008,7 @@ WITH CHECK (true);</pre>
 
                     doc.autoTable({
                         startY: 37,
-                        head: [['Hari', 'Waktu', 'Kategori', 'Nama Agenda', 'Lokasi', 'PJ', 'Status']],
+                        head: [['Hari', 'Waktu', 'Kategori', 'Nama Agenda', 'Lokasi', 'PJ']],
                         body: rows,
                         theme: 'grid',
                         headStyles: {
