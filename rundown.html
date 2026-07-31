@@ -590,6 +590,12 @@ WITH CHECK (true);</pre>
             return { start: '', end: '' };
         }
 
+        function parseTimeToMinutes(timeStr) {
+            const m = String(timeStr || '').match(/(\d{1,2})[.:](\d{2})/);
+            if (!m) return Number.MAX_SAFE_INTEGER;
+            return (parseInt(m[1]) * 60) + parseInt(m[2]);
+        }
+
         function updateTimePreview() {
             const start = document.getElementById('input-time-start').value;
             const end = document.getElementById('input-time-end').value;
@@ -900,7 +906,8 @@ WITH CHECK (true);</pre>
             const todayName = dayNames[today.getDay()];
             const todayStr = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
-            const todayItems = scheduleData.filter(i => i.day === todayName);
+            const todayItems = scheduleData.filter(i => i.day === todayName)
+                .sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time));
 
             let msg = `📅 *JADWAL HARI INI - ${todayName}, ${todayStr.toUpperCase()}*\n\n`;
 
