@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Absensi KKN</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toast-msg" class="font-medium">Pesan notifikasi...</span>
+    </div>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-700 to-indigo-900 text-white">
+        <div class="max-w-4xl mx-auto px-4 py-6">
+            <h1 class="text-xl font-extrabold flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-check"></i> Rekap Absensi KKN
+            </h1>
+            <p class="text-indigo-200 text-xs mt-0.5">Pantau kehadiran anggota per hari</p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- Filter -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-600">Tanggal:</label>
+                <input type="date" id="filter-date" onchange="loadRekap()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="loadRekap()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate"></i> Muat Ulang
+                </button>
+                <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-excel"></i> Export CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="grid grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Anggota</span>
+                <span id="sum-total" class="text-2xl font-black text-slate-800">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Hadir</span>
+                <span id="sum-hadir" class="text-2xl font-black text-emerald-600">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                <span class="text-[11px] font-bold text-rose-500 uppercase tracking-wider block">Tidak Hadir</span>
+                <span id="sum-alpha" class="text-2xl font-black text-rose-500">0</span>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
+                            <th class="py-3 px-4">NIM</th>
+                            <th class="py-3 px-4">Nama</th>
+                            <th class="py-3 px-4">Jam Absen</th>
+                            <th class="py-3 px-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekap-tbody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div id="rekap-empty" class="py-8 text-center text-xs text-slate-400">Memuat data...</div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // SUPABASE CONFIGURATION
+        // ==========================================
+        const SUPABASE_URL = "https://mtxtfkivxmpnsakktzpw.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10eHRma2l2eG1wbnNha2t0enB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MDc1MDIsImV4cCI6MjEwMDk4MzUwMn0.XQul1dsbkvI96UFs93tF9mRuXHCrF5PmipGVaAizorE";
+
+        let supabaseClient = null;
+        if (typeof supabase !== 'undefined' && supabase.createClient) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let members = [];
+        let hadirMap = {}; // nim -> kehadiran item
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').className = 'fa-solid fa-' + (type === 'success' ? 'circle-check text-emerald-400' : 'circle-xmark text-rose-400');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
+
+        function todayStr() {
+            const d = new Date();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${d.getFullYear()}-${mm}-${dd}`;
+        }
+
+        function formatJam(ts) {
+            if (!ts) return '-';
+            const d = new Date(ts);
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+
+        async function loadRekap() {
+            const dateEl = document.getElementById('filter-date');
+            const tanggal = dateEl.value || todayStr();
+            dateEl.value = tanggal;
+            const tbody = document.getElementById('rekap-tbody');
+            const empty = document.getElementById('rekap-empty');
+
+            try {
+                const [anggotaRes, kehadiranRes] = await Promise.all([
+                    supabaseClient.from('anggota').select('*').order('nim'),
+                    supabaseClient.from('kehadiran').select('*').eq('tanggal', tanggal).order('jam', { ascending: true })
+                ]);
+                if (anggotaRes.error) throw anggotaRes.error;
+                if (kehadiranRes.error) throw kehadiranRes.error;
+
+                members = anggotaRes.data || [];
+                hadirMap = {};
+                (kehadiranRes.data || []).forEach(k => { hadirMap[k.nim] = k; });
+
+                const hadir = Object.keys(hadirMap).length;
+                const alpha = members.length - hadir;
+                document.getElementById('sum-total').innerText = members.length;
+                document.getElementById('sum-hadir').innerText = hadir;
+                document.getElementById('sum-alpha').innerText = alpha;
+
+                if (members.length === 0) {
+                    empty.classList.remove('hidden');
+                    empty.innerText = 'Belum ada data anggota.';
+                    tbody.innerHTML = '';
+                    return;
+                }
+
+                empty.classList.add('hidden');
+                tbody.innerHTML = members.map(member => {
+                    const k = hadirMap[member.nim];
+                    if (k) {
+                        return `
+                            <tr class="hover:bg-slate-50/80">
+                                <td class="py-3 px-4 font-mono text-xs text-slate-600">${member.nim}</td>
+                                <td class="py-3 px-4 font-bold text-slate-800">${member.nama}</td>
+                                <td class="py-3 px-4 font-medium text-slate-600">${formatJam(k.jam)}</td>
+                                <td class="py-3 px-4"><span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">✅ Hadir</span></td>
+                            </tr>`;
+                    }
+                    return `
+                        <tr class="hover:bg-slate-50/80">
+                            <td class="py-3 px-4 font-mono text-xs text-slate-600">${member.nim}</td>
+                            <td class="py-3 px-4 font-bold text-slate-800">${member.nama}</td>
+                            <td class="py-3 px-4 text-slate-400">-</td>
+                            <td class="py-3 px-4"><span class="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full">❌ Tidak Hadir</span></td>
+                        </tr>`;
+                }).join('');
+            } catch (e) {
+                empty.classList.remove('hidden');
+                empty.innerText = 'Gagal memuat data: ' + e.message;
+            }
+        }
+
+        function exportCSV() {
+            if (members.length === 0) {
+                showToast('Belum ada data untuk diexport!', 'danger');
+                return;
+            }
+            const tanggal = document.getElementById('filter-date').value || todayStr();
+            let csv = "data:text/csv;charset=utf-8,\uFEFF";
+            csv += "NIM,Nama,Jam Absen,Status\n";
+            members.forEach(member => {
+                const k = hadirMap[member.nim];
+                const jam = k ? formatJam(k.jam) : '-';
+                const status = k ? 'Hadir' : 'Tidak Hadir';
+                csv += `${member.nim},"${member.nama.replace(/"/g, '""')}",${jam},${status}\n`;
+            });
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csv));
+            link.setAttribute("download", `Rekap_Absen_${tanggal}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('CSV rekap berhasil diunduh!');
+        }
+
+        // Init
+        (async function init() {
+            document.getElementById('filter-date').value = todayStr();
+            await loadRekap();
+        })();
+    </script>
+</body>
+</html>

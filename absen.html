@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi QR KKN</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- HTML5 QR Scanner -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toast-msg" class="font-medium">Pesan notifikasi...</span>
+    </div>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-700 to-indigo-900 text-white">
+        <div class="max-w-3xl mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-extrabold flex items-center gap-2">
+                        <i class="fa-solid fa-qrcode"></i> Absensi QR KKN
+                    </h1>
+                    <p class="text-indigo-200 text-xs mt-0.5">Scan QR anggota untuk absen otomatis</p>
+                </div>
+                <div class="flex flex-col items-end gap-1.5">
+                    <span id="db-status-badge" class="bg-slate-500/30 text-slate-200 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-400/30">
+                        Menghubungkan...
+                    </span>
+                    <button onclick="openSqlModal()" class="bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-database"></i> Setup Database
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <button id="btn-scan" onclick="startScanner()" class="bg-white text-indigo-900 font-bold text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 hover:bg-indigo-50 transition-all">
+                    <i class="fa-solid fa-camera"></i> Scan Beruntun
+                </button>
+                <button id="btn-stop" onclick="stopScanner()" class="hidden bg-rose-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 hover:bg-rose-600 transition-all">
+                    <i class="fa-solid fa-stop"></i> Hentikan Scan
+                </button>
+                <span class="text-indigo-200 text-[11px] self-center ml-1"><i class="fa-solid fa-lightbulb"></i> Atau scan QR pakai kamera biasa (HP langsung buka halaman ini)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- Scanner Container -->
+        <div id="scanner-card" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-3 border-b border-slate-100 flex items-center justify-between">
+                <span class="text-sm font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-camera text-indigo-500"></i> Arahkan kamera ke QR anggota</span>
+                <span id="scan-count" class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">0x scan</span>
+            </div>
+            <div id="qr-reader" class="w-full"></div>
+        </div>
+
+        <!-- Result / Mode B Panel -->
+        <div id="result-card" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center">
+            <div id="result-icon" class="text-5xl mb-3"><i class="fa-solid fa-circle-check text-emerald-500"></i></div>
+            <div id="result-name" class="text-xl font-extrabold text-slate-800">-</div>
+            <div id="result-nim" class="text-xs font-mono text-slate-500 mt-1">-</div>
+            <div id="result-time" class="text-sm font-semibold text-slate-600 mt-3">-</div>
+            <div class="mt-5 flex justify-center gap-3">
+                <button onclick="location.reload()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow transition-all">Absen Lagi</button>
+                <button onclick="document.getElementById('result-card').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all">Tutup</button>
+            </div>
+        </div>
+
+        <!-- Attendance Today -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-indigo-500"></i> Kehadiran Hari Ini</h2>
+                    <p class="text-[11px] text-slate-500" id="today-label">-</p>
+                </div>
+                <span id="hadir-count" class="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">0/13 hadir</span>
+            </div>
+            <div class="divide-y divide-slate-100" id="attendance-list"></div>
+            <div class="p-4 text-center text-xs text-slate-400" id="attendance-empty">Memuat data...</div>
+        </div>
+    </div>
+
+    <!-- SQL Setup Modal -->
+    <div id="modal-sql" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-slate-800"><i class="fa-solid fa-database text-indigo-500 mr-2"></i>Setup Database Absensi</h3>
+                <button onclick="closeSqlModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-5">
+                <p class="text-xs text-slate-600 mb-3">Jalankan perintah ini di <b>Supabase Dashboard → SQL Editor</b>. Buat tabel <code class="bg-slate-100 px-1 rounded">anggota</code>, <code class="bg-slate-100 px-1 rounded">kehadiran</code>, aktifkan RLS, dan masukkan 13 anggota KKN.</p>
+                <pre id="sql-code" class="bg-slate-900 text-emerald-400 p-4 rounded-xl text-[11px] font-mono leading-relaxed overflow-x-auto custom-scrollbar">CREATE TABLE IF NOT EXISTS anggota (
+  nim TEXT PRIMARY KEY,
+  nama TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS kehadiran (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nim TEXT,
+  nama TEXT,
+  tanggal DATE DEFAULT CURRENT_DATE,
+  jam TIMESTAMPTZ DEFAULT NOW(),
+  source TEXT DEFAULT 'scan'
+);
+
+-- RLS
+ALTER TABLE anggota ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kehadiran ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public Full Access" ON anggota FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Full Access" ON kehadiran FOR ALL USING (true) WITH CHECK (true);
+
+INSERT INTO anggota (nim, nama) VALUES
+('2022140072', 'Bagas Rizqy Maulana'),
+('2022140073', 'Dafa Maulana Abdillah'),
+('2022150016', 'Nurohim'),
+('2022150056', 'Elfan Dwi Saputra'),
+('2023080067', 'Iqna Ummi Habibah'),
+('2023080073', 'Muna Fauziyah'),
+('2023090041', 'Az Zahra Salsabila'),
+('2023090049', 'Sri Lestari'),
+('2023100028', 'Umi Hafidzotun Nafisah'),
+('2023100029', 'Windi Astia'),
+('2023110019', 'Ais Natasa Hareva'),
+('2023110254', 'Taufik Ismail'),
+('2023110264', 'Ayu Hikmatullah');</pre>
+                <div class="flex items-center justify-between pt-3">
+                    <span class="text-[11px] text-slate-500"><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> RLS publik diaktifkan</span>
+                    <button onclick="copySqlCode()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-copy"></i> <span id="copy-sql-btn-text">Salin Perintah SQL</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // SUPABASE CONFIGURATION
+        // ==========================================
+        const SUPABASE_URL = "https://mtxtfkivxmpnsakktzpw.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10eHRma2l2eG1wbnNha2t0enB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MDc1MDIsImV4cCI6MjEwMDk4MzUwMn0.XQul1dsbkvI96UFs93tF9mRuXHCrF5PmipGVaAizorE";
+
+        let supabaseClient = null;
+        if (typeof supabase !== 'undefined' && supabase.createClient) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let members = [];
+        let html5QrCode = null;
+        let scanCount = 0;
+        let lastScan = '';
+
+        // ==========================================
+        // Toast Helper
+        // ==========================================
+        let toastTimer = null;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').innerText = msg;
+            icon.className = 'fa-solid fa-' + (type === 'success' ? 'circle-check text-emerald-400' : type === 'danger' ? 'circle-xmark text-rose-400' : 'triangle-exclamation text-amber-400');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
+
+        function updateStatusBadge(text, ok = true) {
+            const badge = document.getElementById('db-status-badge');
+            if (!badge) return;
+            badge.className = ok
+                ? "bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30"
+                : "bg-rose-500/20 text-rose-300 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border border-rose-500/30";
+            badge.innerText = text;
+        }
+
+        // ==========================================
+        // Date Helpers
+        // ==========================================
+        function todayStr() {
+            const d = new Date();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${d.getFullYear()}-${mm}-${dd}`;
+        }
+
+        function formatJam(ts) {
+            if (!ts) return '-';
+            const d = new Date(ts);
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+
+        // ==========================================
+        // Load Members & Attendance
+        // ==========================================
+        async function loadMembers() {
+            try {
+                const { data, error } = await supabaseClient.from('anggota').select('*').order('nim');
+                if (error) throw error;
+                members = data || [];
+                return true;
+            } catch (e) {
+                updateStatusBadge('Supabase Error: ' + (e.message || ''), false);
+                return false;
+            }
+        }
+
+        async function loadAttendance() {
+            const listEl = document.getElementById('attendance-list');
+            const emptyEl = document.getElementById('attendance-empty');
+            document.getElementById('today-label').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('kehadiran')
+                    .select('*')
+                    .eq('tanggal', todayStr())
+                    .order('jam', { ascending: true });
+                if (error) throw error;
+
+                const hadir = data || [];
+                document.getElementById('hadir-count').innerText = `${hadir.length}/${members.length} hadir`;
+
+                if (hadir.length === 0) {
+                    listEl.innerHTML = '';
+                    emptyEl.classList.remove('hidden');
+                    emptyEl.innerText = 'Belum ada yang absen hari ini.';
+                    return;
+                }
+
+                emptyEl.classList.add('hidden');
+                listEl.innerHTML = hadir.map(item => `
+                    <div class="flex items-center justify-between px-4 py-2.5">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black"><i class="fa-solid fa-user-check"></i></span>
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">${item.nama}</p>
+                                <p class="text-[10px] font-mono text-slate-400">${item.nim}</p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">${formatJam(item.jam)}</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                emptyEl.classList.remove('hidden');
+                emptyEl.innerText = 'Gagal memuat kehadiran.';
+            }
+        }
+
+        // ==========================================
+        // Record Attendance (core logic)
+        // ==========================================
+        async function recordAttendance(nim) {
+            const member = members.find(m => String(m.nim) === String(nim));
+            if (!member) {
+                return { ok: false, msg: 'NIM tidak ditemukan di database anggota!' };
+            }
+
+            // Duplicate check per day
+            const { data: existing, error: chkErr } = await supabaseClient
+                .from('kehadiran')
+                .select('jam')
+                .eq('nim', nim)
+                .eq('tanggal', todayStr());
+
+            if (chkErr) return { ok: false, msg: 'Gagal cek duplikat.' };
+            if (existing && existing.length > 0) {
+                return { ok: false, already: true, name: member.nama, jam: existing[0].jam };
+            }
+
+            const { error } = await supabaseClient
+                .from('kehadiran')
+                .insert([{ nim: member.nim, nama: member.nama, source: 'scan' }]);
+
+            if (error) return { ok: false, msg: 'Gagal simpan: ' + error.message };
+            return { ok: true, name: member.nama, nim: member.nim };
+        }
+
+        async function handleScan(nim) {
+            const res = await recordAttendance(nim);
+            if (res.ok) {
+                showToast(`✅ ${res.name} berhasil absen!`);
+                loadAttendance();
+            } else if (res.already) {
+                showToast(`⚠️ ${res.name} sudah absen jam ${formatJam(res.jam)}`, 'warn');
+            } else {
+                showToast(res.msg, 'danger');
+            }
+            return res;
+        }
+
+        function showResult(res) {
+            const card = document.getElementById('result-card');
+            const icon = document.getElementById('result-icon');
+            document.getElementById('result-name').innerText = res.name || '-';
+            document.getElementById('result-nim').innerText = res.nim || '-';
+            if (res.ok) {
+                icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i>';
+                document.getElementById('result-time').innerText = 'Absen berhasil pada ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            } else if (res.already) {
+                icon.innerHTML = '<i class="fa-solid fa-circle-exclamation text-amber-500"></i>';
+                document.getElementById('result-time').innerText = 'Sudah absen jam ' + formatJam(res.jam);
+            } else {
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-500"></i>';
+                document.getElementById('result-time').innerText = res.msg || 'Gagal absen';
+            }
+            card.classList.remove('hidden');
+        }
+
+        // ==========================================
+        // Mode B: URL Param (native camera scan)
+        // ==========================================
+        async function handleUrlParam() {
+            const params = new URLSearchParams(window.location.search);
+            const qr = params.get('qr');
+            if (!qr) return;
+
+            const res = await handleScan(qr);
+            showResult(res);
+            history.replaceState({}, '', window.location.pathname);
+        }
+
+        // ==========================================
+        // Mode A: In-browser camera scanner
+        // ==========================================
+        async function startScanner() {
+            if (typeof Html5Qrcode === 'undefined') {
+                showToast('Library scanner tidak terload!', 'danger');
+                return;
+            }
+            if (html5QrCode) {
+                try { await html5QrCode.stop(); } catch (e) {}
+                html5QrCode = null;
+            }
+
+            const card = document.getElementById('scanner-card');
+            card.classList.remove('hidden');
+            document.getElementById('btn-scan').classList.add('hidden');
+            document.getElementById('btn-stop').classList.remove('hidden');
+            scanCount = 0;
+            document.getElementById('scan-count').innerText = '0x scan';
+            lastScan = '';
+
+            html5QrCode = new Html5Qrcode("qr-reader");
+            try {
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 220, height: 220 } },
+                    async (decodedText) => {
+                        const nim = extractNim(decodedText);
+                        if (!nim || nim === lastScan) return;
+                        lastScan = nim;
+                        scanCount++;
+                        document.getElementById('scan-count').innerText = `${scanCount}x scan`;
+                        await handleScan(nim);
+                        setTimeout(() => { if (lastScan === nim) lastScan = ''; }, 1200);
+                    },
+                    () => {}
+                );
+                showToast('Kamera aktif. Scan QR anggota...', 'info');
+            } catch (e) {
+                console.error('Scanner error:', e);
+                showToast('Gagal akses kamera: ' + e.message, 'danger');
+                document.getElementById('btn-scan').classList.remove('hidden');
+                document.getElementById('btn-stop').classList.add('hidden');
+                card.classList.add('hidden');
+            }
+        }
+
+        async function stopScanner() {
+            if (html5QrCode) {
+                try { await html5QrCode.stop(); } catch (e) {}
+                html5QrCode = null;
+            }
+            document.getElementById('scanner-card').classList.add('hidden');
+            document.getElementById('btn-scan').classList.remove('hidden');
+            document.getElementById('btn-stop').classList.add('hidden');
+        }
+
+        function extractNim(decodedText) {
+            const t = String(decodedText || '');
+            const m = t.match(/[?&]qr=([^&]+)/);
+            if (m) return m[1];
+            return t.trim();
+        }
+
+        // ==========================================
+        // SQL Modal
+        // ==========================================
+        function openSqlModal() {
+            document.getElementById('modal-sql').classList.remove('hidden');
+        }
+        function closeSqlModal() {
+            document.getElementById('modal-sql').classList.add('hidden');
+        }
+        async function copySqlCode() {
+            const el = document.getElementById('sql-code');
+            const btn = document.getElementById('copy-sql-btn-text');
+            try {
+                await navigator.clipboard.writeText(el.innerText);
+                btn.innerText = 'Tersalin!';
+                showToast('Perintah SQL disalin!');
+                setTimeout(() => btn.innerText = 'Salin Perintah SQL', 2000);
+            } catch (e) {
+                showToast('Gagal menyalin. Salin manual.', 'danger');
+            }
+        }
+
+        // ==========================================
+        // Init
+        // ==========================================
+        (async function init() {
+            const ok = await loadMembers();
+            if (ok && members.length > 0) {
+                updateStatusBadge('Supabase Cloud: Terhubung');
+            } else {
+                updateStatusBadge(ok ? 'Anggota kosong (isi via SQL)' : 'Supabase: Error', false);
+            }
+            await loadAttendance();
+            await handleUrlParam();
+        })();
+    </script>
+</body>
+</html>
