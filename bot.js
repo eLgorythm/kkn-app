@@ -26,6 +26,60 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const BOT_FOOTER = `\n_— 0xfndLabs KKN System_ 🤖`;
 
+// ==========================================
+// Absen Realtime Notification Config
+// ==========================================
+const TRACK_FILE = 'absen_tracked.json';
+
+function loadTrackedGroups() {
+    try {
+        if (fs.existsSync(TRACK_FILE)) {
+            return new Set(JSON.parse(fs.readFileSync(TRACK_FILE, 'utf8')));
+        }
+    } catch (e) {}
+    return new Set();
+}
+
+function saveTrackedGroups() {
+    try {
+        fs.writeFileSync(TRACK_FILE, JSON.stringify([...trackedGroups]));
+    } catch (e) {}
+}
+
+const trackedGroups = loadTrackedGroups();
+
+function todayStr() {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function formatJam(ts) {
+    if (!ts) return '-';
+    const d = new Date(ts);
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function setupAbsenRealtime(sock) {
+    if (!supabaseClient) return;
+    supabaseClient
+        .channel('public:kehadiran')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'kehadiran' }, async (payload) => {
+            const row = payload.new;
+            if (!row || !row.nama) return;
+            const notif = `✅ *ABSEN MASUK!*\n\n👤 *${row.nama}*\n🆔 NIM: ${row.nim}\n⏰ Jam: ${formatJam(row.jam)}\n📅 Tanggal: ${row.tanggal || todayStr()}` + BOT_FOOTER;
+            for (const jid of trackedGroups) {
+                try {
+                    await sock.sendMessage(jid, { text: notif });
+                } catch (e) {
+                    console.error("Gagal kirim notif absen ke", jid, e);
+                }
+            }
+        })
+        .subscribe();
+}
+
 async function fetchRundownData() {
     try {
         const querySnapshot = await getDocs(collection(db, "rundown_kkn"));
@@ -70,6 +124,12 @@ function sortByWeekAndDate(a, b) {
     return parseDateString(a.date) - parseDateString(b.date);
 }
 
+function parseTimeToMinutes(timeStr) {
+    const m = String(timeStr || '').match(/(\d{1,2})[.:](\d{2})/);
+    if (!m) return Number.MAX_SAFE_INTEGER;
+    return (parseInt(m[1]) * 60) + parseInt(m[2]);
+}
+
 function getMessageText(msg) {
     let m = msg.message;
     if (!m) return '';
@@ -108,6 +168,7 @@ async function startBot() {
             }
         } else if (connection === 'open') {
             console.log('🤖 Bot WhatsApp KKN Desa Sokaraja berhasil terhubung!');
+            setupAbsenRealtime(sock);
         }
     });
 
@@ -140,6 +201,8 @@ const menuMsg = `🤖 *SELAMAT DATANG DI BOT KKN DESA SOKARAJA!* 🎉\n\n` +
                                  `📢 *!broadcast* - Info lengkap semua agenda\n` +
                                   `📩 *!kirim [nomor] [pesan]* - Kirim pesan via WA\n` +
                                   `📊 *!progress* - Cek seberapa jauh kita jalan\n` +
+                                  `📋 *!absen* - Cek kehadiran hari ini\n` +
+                                  `🔔 *!absen on/off* - Aktifkan notif absen di grup\n` +
                                   `⚡ *!ping* - Tes koneksi bot\n` +
                                   `ℹ️ *!menu* - Bantuan ini\n\n` +
                                   `Jangan bosen, jangan lupa, see you di lapangan! 🔥` + BOT_FOOTER;
@@ -173,6 +236,60 @@ const menuMsg = `🤖 *SELAMAT DATANG DI BOT KKN DESA SOKARAJA!* 🎉\n\n` +
                                 `📈 *Progress kita: ${percentage}%*\n\n` +
                                 `Alhamdulillah, kita sudah melangkah sejauh ini! Tinggal *${belum}* lagi yang menanti. Selama kita kompak, semua pasti kebawa. Semangat terus, kawan-kawan! 🌟` + BOT_FOOTER;
                 await sock.sendMessage(remoteJid, { text: progMsg }, { quoted: msg });
+            }
+            else if (text === '!absen on' || text === '!absen off') {
+                const isGroup = remoteJid.endsWith('@g.us');
+                if (!isGroup) {
+                    await sock.sendMessage(remoteJid, { text: "🔔 *!absen on/off* hanya bisa dipakai di dalam grup ya, kawan!" + BOT_FOOTER }, { quoted: msg });
+                } else if (text === '!absen on') {
+                    trackedGroups.add(remoteJid);
+                    saveTrackedGroups();
+                    await sock.sendMessage(remoteJid, { text: "🔔 *NOTIFIKASI ABSEN AKTIF!* ✅\n\nMulai sekarang, setiap anggota yang scan absen akan langsung kuabari di grup ini. Mantap! 🔥" + BOT_FOOTER }, { quoted: msg });
+                } else {
+                    trackedGroups.delete(remoteJid);
+                    saveTrackedGroups();
+                    await sock.sendMessage(remoteJid, { text: "🔕 *Notifikasi absen di grup ini sudah dimatikan.* Tenang, tetap bisa cek manual pakai !absen ya!" + BOT_FOOTER }, { quoted: msg });
+                }
+            }
+            else if (text === '!absen' || text === '!hadir') {
+                try {
+                    const today = todayStr();
+                    const [hadirRes, anggotaRes] = await Promise.all([
+                        supabaseClient.from('kehadiran').select('*').eq('tanggal', today).order('jam', { ascending: true }),
+                        supabaseClient.from('anggota').select('*').order('nim')
+                    ]);
+                    if (hadirRes.error) throw hadirRes.error;
+                    if (anggotaRes.error) throw anggotaRes.error;
+
+                    const hadir = hadirRes.data || [];
+                    const anggota = anggotaRes.data || [];
+                    const hadirNims = new Set(hadir.map(h => String(h.nim)));
+                    const belum = anggota.filter(a => !hadirNims.has(String(a.nim)));
+                    const todayLabel = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+                    let absenMsg = `📋 *LAPORAN KEHADIRAN HARI INI* ✅\n\n`;
+                    absenMsg += `📅 ${todayLabel.toUpperCase()}\n\n`;
+
+                    if (hadir.length > 0) {
+                        absenMsg += `🟢 *SUDAH ABSEN (${hadir.length}/${anggota.length}):*\n\n`;
+                        hadir.forEach((item, index) => {
+                            absenMsg += `${index + 1}. ${item.nama} - ⏰ ${formatJam(item.jam)}\n`;
+                        });
+                    } else {
+                        absenMsg += `🟢 *SUDAH ABSEN:* Belum ada yang absen. 😴\n\n`;
+                    }
+
+                    if (belum.length > 0) {
+                        absenMsg += `\n🔴 *BELUM ABSEN (${belum.length}):*\n`;
+                        absenMsg += belum.map(a => `   • ${a.nama}`).join('\n');
+                    }
+
+                    absenMsg += `\n\nYuk saling ingetin biar kehadiran kita 100%! 💪` + BOT_FOOTER;
+                    await sock.sendMessage(remoteJid, { text: absenMsg }, { quoted: msg });
+                } catch (e) {
+                    console.error("!absen error:", e);
+                    await sock.sendMessage(remoteJid, { text: "⚠️ Gagal ambil data kehadiran. Pastikan tabel anggota & kehadiran sudah dibuat." + BOT_FOOTER }, { quoted: msg });
+                }
             }
 else if (text.startsWith('!jadwal')) {
                  const data = await fetchRundownData();
@@ -226,7 +343,8 @@ else if (text.startsWith('!jadwal')) {
                  const todayName = dayNames[today.getDay()];
                  const todayStr = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
-                 const todayItems = data.filter(i => i.day === todayName);
+                 const todayItems = data.filter(i => i.day === todayName)
+                     .sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time));
 
                  let hariIniMsg = `📅 *HALO KAWAN! INI JADWAL HARI INI* 🔥\n\n`;
                  hariIniMsg += `Khusus buat ${todayName}, ${todayStr.toUpperCase()} - catat baik-baik ya, jangan sampe kelewat! 😤\n\n`;
@@ -261,7 +379,8 @@ else if (text.startsWith('!jadwal')) {
                  const tomorrowName = dayNames[tomorrow.getDay()];
                  const tomorrowStr = tomorrow.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
-                 const tomorrowItems = data.filter(i => i.day === tomorrowName);
+                 const tomorrowItems = data.filter(i => i.day === tomorrowName)
+                     .sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time));
 
                  let besokMsg = `📅 *SELF-REMINDER BUAT BESOK!* ⏰\n\n`;
                  besokMsg += `Jangan sampe lupa ya, besok ${tomorrowName}, ${tomorrowStr.toUpperCase()} kita ada agenda nih:\n\n`;
